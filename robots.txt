@@ -1,0 +1,4 @@
+# Future Partners — PRIVATE prototype preview.
+# This is a stakeholder review build. Do not index or archive.
+User-agent: *
+Disallow: /

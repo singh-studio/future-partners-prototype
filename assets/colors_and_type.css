@@ -1,0 +1,227 @@
+/* ============================================================
+   FUTURE PARTNERS — Design Tokens  (aligned to Brand Guidelines v1)
+   Brand colours: Green #1BA085 + Black #000000.  Type: Lexend.
+   Logo linking shape = a koru (authentic partnership → growth).
+   ============================================================ */
+
+/* Webfonts — Lexend is the brand typeface (free, Google Fonts).
+   Bold for headings, Light for body. Arial is the system fallback. */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ---------- BRAND PALETTE ---------- */
+
+  /* Green — the brand colour (#1BA085, CMYK 80/15/60/0, RGB 27/160/133) */
+  --green-50:  #ECF8F4;
+  --green-100: #CFEDE4;
+  --green-200: #A0DDCB;
+  --green-300: #66C9AE;
+  --green-400: #34B393;
+  --green-500: #1BA085;   /* BRAND GREEN */
+  --green-600: #157F69;
+  --green-700: #126655;
+  --green-800: #0F4E41;
+  --green-900: #0C3A30;
+
+  /* Black — the brand's second colour (#000000) + near-blacks for text */
+  --black:   #000000;      /* BRAND BLACK */
+  --ink-900: #0B0E0D;
+  --ink-800: #161917;
+  --ink-700: #2A2E2C;
+  --ink-600: #474C49;
+  --ink-500: #62675F;
+  --ink-400: #838883;
+  --ink-300: #A9AEA9;
+
+  /* Neutrals — clean, near-white with the faintest green cast */
+  --white: #FFFFFF;
+  --paper: #FAFBFA;        /* page background */
+  --mist:  #F2F5F3;
+  --cloud: #E9ECEA;
+  --line:        #E1E5E2;
+  --line-strong: #CCD2CE;
+
+  /* Functional UI only — NOT brand colours. Use sparingly in product UI. */
+  --success: #1BA085;
+  --warning: #C98A1E;
+  --danger:  #C0392B;
+  --info:    #157F69;
+
+  /* ---------- SEMANTIC ---------- */
+  --bg:           var(--white);
+  --bg-subtle:    var(--mist);
+  --surface:      var(--white);
+  --surface-soft: var(--paper);
+  --bg-deep:      var(--green-900);   /* dark green sections */
+  --bg-black:     var(--black);       /* black sections      */
+
+  --fg1: var(--ink-900);   /* primary text — near black */
+  --fg2: var(--ink-600);   /* secondary text            */
+  --fg3: var(--ink-400);   /* captions / meta           */
+  --fg-on-dark:     #F4F7F5;
+  --fg-on-dark-dim: #AFC6BE;
+
+  --primary:       var(--green-500);
+  --primary-hover: var(--green-600);
+  --primary-press: var(--green-700);
+  --on-primary:    #FFFFFF;
+  --highlight:     var(--green-500);  /* "text highlights can be in green" */
+
+  --border:        var(--line);
+  --border-strong: var(--line-strong);
+  --focus-ring:    var(--green-400);
+
+  /* ---------- TYPE (Lexend) ---------- */
+  --font-display: 'Lexend', Arial, system-ui, sans-serif;   /* Bold weights  */
+  --font-body:    'Lexend', Arial, system-ui, sans-serif;   /* Light/Regular */
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Fluid type scale (16px base, ~1.25 ratio) */
+  --text-display: clamp(2.6rem, 5vw, 4rem);   /* hero        */
+  --text-h1: clamp(2rem, 3.4vw, 2.9rem);      /* 46          */
+  --text-h2: clamp(1.65rem, 2.5vw, 2.15rem);  /* 34          */
+  --text-h3: 1.45rem;                          /* 23          */
+  --text-h4: 1.2rem;                           /* 19          */
+  --text-lead: 1.2rem;                         /* lead para   */
+  --text-body: 1.0625rem;                      /* 17          */
+  --text-sm: 0.9375rem;                        /* 15          */
+  --text-xs: 0.8125rem;                        /* 13 caption  */
+  --text-eyebrow: 0.78rem;                     /* overline    */
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-normal: 1.65;
+
+  --tracking-tight: -0.02em;
+  --tracking-eyebrow: 0.18em;
+
+  --weight-light: 300;
+  --weight-reg: 400;
+  --weight-med: 500;
+  --weight-semi: 600;
+  --weight-bold: 700;
+
+  /* ---------- RADII ---------- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  --radius-pill: 999px;
+
+  /* ---------- SHADOWS (neutral, soft) ---------- */
+  --shadow-xs: 0 1px 2px rgba(11, 14, 13, 0.06);
+  --shadow-sm: 0 2px 8px -2px rgba(11, 14, 13, 0.10);
+  --shadow: 0 10px 26px -12px rgba(11, 14, 13, 0.18);
+  --shadow-lg: 0 24px 56px -20px rgba(11, 14, 13, 0.22);
+  --shadow-green: 0 14px 30px -12px rgba(27, 160, 133, 0.40);
+
+  /* ---------- SPACING (4pt) ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 96px; --space-10: 128px;
+
+  --container: 1200px;
+  --container-narrow: 760px;
+}
+
+/* ============================================================
+   SEMANTIC ELEMENT STYLES
+   ============================================================ */
+.fp-eyebrow {
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.fp-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+}
+h1, .fp-h1 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-h1);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+}
+h2, .fp-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-h2);
+  line-height: var(--leading-snug);
+  letter-spacing: -0.01em;
+  color: var(--fg1);
+}
+h3, .fp-h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semi);
+  font-size: var(--text-h3);
+  line-height: var(--leading-snug);
+  color: var(--fg1);
+}
+h4, .fp-h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semi);
+  font-size: var(--text-h4);
+  color: var(--fg1);
+}
+.fp-lead {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-lead);
+  line-height: var(--leading-normal);
+  color: var(--fg2);
+}
+p, .fp-body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  color: var(--fg2);
+}
+.fp-small { font-size: var(--text-sm); line-height: 1.5; }
+.fp-caption { font-family: var(--font-body); font-size: var(--text-xs); color: var(--fg3); }
+code, .fp-mono { font-family: var(--font-mono); font-size: 0.9em; }
+
+/* green text highlight */
+.fp-hl { color: var(--highlight); }
+
+/* ============================================================
+   BACK-COMPAT ALIASES
+   Earlier files referenced jade/coral/ocean/sand tokens. The brand is
+   Green + Black only, so these alias onto the real palette: jade→green
+   (brand), ocean→green (brand), coral→black/ink (the only "accent" the
+   brand allows), warm neutrals→clean neutrals. Prefer the real tokens
+   (--green-*, --ink-*, --mist, --cloud) in new work.
+   ============================================================ */
+:root {
+  --jade-50: var(--green-50);   --jade-100: var(--green-100);
+  --jade-200: var(--green-200); --jade-300: var(--green-300);
+  --jade-400: var(--green-400); --jade-500: var(--green-500);
+  --jade-600: var(--green-600); --jade-700: var(--green-700);
+  --jade-800: var(--green-800); --jade-900: var(--green-900);
+
+  --ocean-50: var(--green-50);   --ocean-100: var(--green-100);
+  --ocean-300: var(--green-300); --ocean-500: var(--green-500);
+  --ocean-600: var(--green-600); --ocean-700: var(--green-700);
+
+  --coral-50: var(--mist);      --coral-100: var(--cloud);
+  --coral-300: var(--ink-400);  --coral-500: var(--ink-900);
+  --coral-600: var(--black);    --coral-700: var(--black);
+
+  --cream: var(--mist);
+  --sand: var(--cloud);
+  --sand-deep: var(--line-strong);
+  --surface-sand: var(--cloud);
+
+  --font-wordmark: var(--font-display);
+  --shadow-jade: var(--shadow-green);
+}

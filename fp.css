@@ -1,0 +1,109 @@
+/* Future Partners — Field Atlas shared styles
+   Imports brand tokens, then adds Atlas-specific utilities. */
+@import url('assets/colors_and_type.css');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+/* page transition — premium loading curtain (eases up, simulates load, lifts to reveal) */
+.route-curtain{position:fixed;inset:0;z-index:2000;background:var(--green-900);
+  display:flex;align-items:center;justify-content:center;
+  transform:translateY(101%);transition:transform .66s cubic-bezier(.76,0,.24,1)}
+.route-curtain.cover{transform:translateY(0)}
+.route-curtain.leave{transform:translateY(-101%);transition:transform .62s cubic-bezier(.76,0,.24,1)}
+.route-loader{display:flex;flex-direction:column;align-items:center;gap:24px}
+.route-curtain.leave .route-loader{opacity:0;transition:opacity .3s ease}
+.route-curtain-mark{width:158px;height:auto;filter:brightness(0) invert(1);opacity:.96}
+.route-bar{width:200px;height:2px;background:rgba(255,255,255,.16);border-radius:2px;overflow:hidden}
+.route-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green-400),var(--green-200));border-radius:2px}
+.route-pct{font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;color:rgba(255,255,255,.66)}
+.route-pct::after{content:"%"}
+@media (prefers-reduced-motion:reduce){.route-curtain{display:none}}
+body{margin:0;background:var(--bg);color:var(--fg1);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+::selection{background:var(--green-200)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:var(--container);margin:0 auto;padding:0 40px}
+.narrow{max-width:var(--container-narrow);margin:0 auto;padding:0 40px}
+.section{padding:var(--space-9) 0}
+
+/* ---------- eyebrow ---------- */
+.eyebrow{font-weight:700;font-size:var(--text-eyebrow);letter-spacing:.18em;text-transform:uppercase;color:var(--primary);margin:0 0 16px}
+.eyebrow.on-dark{color:var(--green-300)}
+
+/* ---------- atlas metadata (the recurring "field" device) ---------- */
+.meta{font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;color:var(--fg3);text-transform:uppercase}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.coord{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--green-700);font-weight:500}
+.coord.on-dark{color:var(--green-300)}
+
+/* atlas tag — small map-legend pill */
+.atag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11.5px;font-weight:500;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--green-800);background:var(--green-50);
+  border:1px solid var(--green-100);padding:4px 10px;border-radius:var(--radius-pill);white-space:nowrap;line-height:1.1}
+.atag.solid{background:var(--green-500);color:#fff;border-color:transparent}
+.atag.on-dark{background:rgba(10,42,34,.58);border-color:rgba(255,255,255,.28);color:#fff;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.atag .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7}
+
+/* photo caption tag on imagery (atlas style) */
+.ph-cap{position:absolute;left:16px;bottom:14px;z-index:2;display:flex;flex-direction:column;gap:4px}
+.ph-cap .ph-coord{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)}
+.ph-cap .ph-name{font-weight:700;font-size:13.5px;color:#fff;letter-spacing:.01em}
+
+/* ---------- buttons ---------- */
+.btn{font-family:var(--font-body);font-weight:700;font-size:15px;border-radius:var(--radius-pill);
+  padding:13px 26px;border:1.5px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:9px;
+  transition:background .18s ease,transform .18s ease,box-shadow .18s ease,color .18s ease,border-color .18s ease;white-space:nowrap;text-decoration:none}
+.btn .arr{font-weight:600;transition:transform .18s ease}
+.btn:hover .arr{transform:translateX(3px)}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:var(--shadow-green)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-primary:active{background:var(--primary-press);box-shadow:none;transform:translateY(1px)}
+.btn-secondary{background:transparent;color:var(--green-700);border-color:var(--green-500)}
+.btn-secondary:hover{background:var(--green-50)}
+.btn-ghost{background:transparent;color:var(--green-700);padding-left:6px;padding-right:6px}
+.btn-ghost:hover{color:var(--green-900)}
+.btn-white{background:#fff;color:var(--green-800)}
+.btn-white:hover{background:var(--mist)}
+.btn-ondark{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+.btn-ondark:hover{background:rgba(255,255,255,.1)}
+.btn-lg{padding:16px 30px;font-size:16px}
+.btn-sm{padding:9px 18px;font-size:13.5px}
+
+/* ---------- photo placeholders (stand in for Sea / Forest / Crossing photography) ---------- */
+.photo{position:relative;overflow:hidden;background:#cdbfa6 var(--ph,none);background-size:cover;background-position:center}
+.photo.has-portrait{background-position:center 16%}
+.photo::after{content:"";position:absolute;inset:0;pointer-events:none}
+.photo.wash::after{background:linear-gradient(180deg,rgba(8,40,33,0) 34%,rgba(8,40,33,.55) 100%)}
+.photo.wash-soft::after{background:linear-gradient(180deg,rgba(8,40,33,0) 50%,rgba(8,40,33,.34) 100%)}
+.fill-sea{--ph:radial-gradient(125% 130% at 18% 14%,#bfe6df 0%,#5fb19a 36%,#2b8f78 64%,#0e5a4b 100%)}
+.fill-coast{--ph:radial-gradient(120% 130% at 20% 10%,#bfe0e8 0%,#5fa3c0 45%,#2e7da6 78%,#1f5e80 100%)}
+.fill-forest{--ph:radial-gradient(120% 130% at 16% 12%,#a7d6b0 0%,#4ba88c 42%,#15806a 78%,#0e4a3e 100%)}
+.fill-earth{--ph:radial-gradient(120% 130% at 16% 14%,#dcd2b8 0%,#b3a988 45%,#8a7f5f 78%,#5f5740 100%)}
+.fill-crossing{--ph:radial-gradient(120% 130% at 18% 12%,#e8cfa6 0%,#c79f73 45%,#9a7551 78%,#6f5238 100%)}
+.fill-dawn{--ph:radial-gradient(130% 130% at 22% 8%,#bfe6df 0%,#5fb19a 38%,#2b8f78 66%,#155f54 100%)}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.card-link{cursor:pointer}
+.card-link:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--green-200)}
+
+/* ---------- cycle stepper chips ---------- */
+.cycle{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cycle-step{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-body);font-weight:600;font-size:14px;
+  color:var(--fg2);background:var(--surface);border:1.5px solid var(--border);padding:9px 16px;border-radius:var(--radius-pill);
+  cursor:pointer;transition:all .16s ease}
+.cycle-step .n{font-family:var(--font-mono);font-size:11px;color:var(--green-600)}
+.cycle-step:hover{border-color:var(--green-300);color:var(--fg1)}
+.cycle-step.active{background:var(--green-500);color:#fff;border-color:transparent}
+.cycle-step.active .n{color:rgba(255,255,255,.7)}
+.cycle-arrow{color:var(--green-300);font-weight:600}
+
+/* fade-up reveal — defined in app.css (CSS load animation) */
+
+/* divider koru curve helper */
+.koru-band{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
