@@ -436,6 +436,6 @@ button.stf-wrow{width:100%;text-align:left;font-family:var(--font-body);backgrou
   .stf-modal-foot{flex-direction:column;align-items:flex-start;gap:12px}
   .stf-modal-actions{margin-left:0;width:100%;display:flex;gap:8px}
   .stf-modal-actions .btn{flex:1;justify-content:center}
-  .stf-seg{flex-wrap:wrap}
-  .stf-seg-btn{flex:1 1 auto}
+  .stf-seg{display:grid;grid-template-columns:1fr 1fr;gap:5px;border-radius:14px}
+  .stf-seg-btn{flex:initial;padding:9px 6px}
 }
