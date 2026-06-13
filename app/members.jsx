@@ -154,7 +154,7 @@ function SpacePlaceholder({label,onSignOut,switcher}){
 const INTRO_COPY = {
   client:    {h:"You're previewing the client workspace", p:"A concept of what a Future Partners client sees — their engagement, deliverables to review, shared files and the team on it. Draft, with example content."},
   associate: {h:"You're previewing the associate library", p:"A concept of the operating library — policies, templates, guides and brand collateral for the delivery network. Draft, with example content."},
-  staff:     {h:"You're previewing the staff workspace", p:"A concept of the back-office — the Ingestion Inbox for files from anywhere, working documents and the website runbook. Draft, with example content."},
+  staff:     {h:"You're previewing the staff workspace", p:"A concept of the team's private space — incoming files, the library, contacts and the website guide. Draft, with example content."},
 };
 function ConceptIntro({space}){
   const key = "fp_intro_"+space;

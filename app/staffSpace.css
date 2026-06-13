@@ -1,6 +1,7 @@
 /* staffSpace.css — Staff workspace styles (prefix: stf-).
-   Consumes the .mem-* shell + design tokens from members.css. No token is
-   hard-coded; no .mem-* class is redefined. The Ingestion Inbox is the showpiece. */
+   Consumes the .mem-* shell + design tokens from the global stylesheet. No token is
+   hard-coded (only #fff on dark chrome + the existing amber warning tint); no .mem-*
+   class is redefined. Incoming is the showpiece; Library + Contacts are the new work. */
 
 /* ============================================================
    AVATARS — initials chips with quiet, token-based tints so the
@@ -9,6 +10,7 @@
 .stf-av{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;
   font-family:var(--font-display);font-weight:700;font-size:11px;color:#fff;flex:0 0 auto;background:var(--green-500);letter-spacing:.01em}
 .stf-av.lg{width:46px;height:46px;font-size:14px}
+.stf-av.xl{width:62px;height:62px;font-size:19px}
 .stf-av.fill-forest{background:var(--green-700)}
 .stf-av.fill-sea{background:var(--green-500)}
 .stf-av.fill-coast{background:var(--green-600)}
@@ -17,10 +19,10 @@
 .stf-av.fill-dawn{background:var(--green-500)}
 
 /* ============================================================
-   1 · INGESTION INBOX
+   1 · INCOMING
    ============================================================ */
 
-/* on-ramps */
+/* ways in (on-ramps) */
 .stf-onramps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .stf-onramp{position:relative;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius-lg);padding:18px;min-height:128px;transition:transform .18s,box-shadow .18s,border-color .18s}
@@ -38,7 +40,7 @@
 .stf-onramp-tag{position:absolute;top:14px;right:14px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;
   color:var(--ink-500);background:var(--mist);border:1px solid var(--cloud);padding:3px 7px;border-radius:var(--radius-pill)}
 
-/* the pipeline explainer — sources → durable copy → filed */
+/* the flow strip — arrives → saved → filed */
 .stf-flow{display:flex;align-items:stretch;gap:8px;margin:18px 0 4px;background:var(--green-900);border-radius:var(--radius-lg);
   padding:16px 18px;overflow:hidden}
 .stf-flow-step{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
@@ -56,7 +58,7 @@
 .stf-stat-warn{background:#FDF4EC;border-color:#F3DEC8}
 .stf-stat-warn .stf-stat-n{color:#C2691E}
 
-/* the list */
+/* the inbox list */
 .stf-list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .stf-listhead{display:grid;grid-template-columns:minmax(0,1fr) 150px 170px 130px 80px 120px;gap:16px;align-items:center;padding:12px 22px;
   background:var(--paper);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)}
@@ -81,7 +83,7 @@
 .stf-filed-as{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--green-700);font-weight:500}
 .stf-filed-as svg{flex:0 0 auto;color:var(--green-600)}
 
-/* source-provenance chip */
+/* where-it-came-from chip */
 .stf-source{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-body);font-size:12px;font-weight:600;
   padding:5px 10px;border-radius:var(--radius-pill);border:1px solid;white-space:nowrap}
 .stf-source svg{flex:0 0 auto}
@@ -95,7 +97,7 @@
 .stf-fileit:hover{background:var(--green-600);border-color:var(--green-600);color:#fff}
 .stf-fileit svg{flex:0 0 auto}
 
-/* ---------- triage modal ---------- */
+/* ---------- "File it" modal ---------- */
 .stf-modal-scrim{position:fixed;inset:0;z-index:120;background:rgba(20,34,28,.5);backdrop-filter:blur(4px);
   display:flex;align-items:center;justify-content:center;padding:24px;animation:stf-fade .18s ease}
 @keyframes stf-fade{from{opacity:0}to{opacity:1}}
@@ -107,7 +109,7 @@
 .stf-modal-x:hover{background:var(--cloud);color:var(--ink-900)}
 .stf-modal-h{font-family:var(--font-display);font-weight:700;font-size:1.4rem;letter-spacing:-.01em;color:var(--ink-900);margin:6px 0 20px;line-height:1.25;padding-right:36px;word-break:break-word}
 
-/* before → after */
+/* where it came from → file it as */
 .stf-triage{display:grid;grid-template-columns:1fr auto 1.35fr;gap:18px;align-items:stretch}
 .stf-triage-side{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
 .stf-triage-from{background:var(--mist)}
@@ -120,7 +122,7 @@
 .stf-rot{color:#C2691E !important}
 .stf-triage-arrow{display:flex;align-items:center;justify-content:center;color:var(--green-400)}
 
-/* triage fields */
+/* file-it fields */
 .stf-fields{display:flex;flex-direction:column;gap:15px}
 .stf-field{display:flex;flex-direction:column;gap:7px}
 .stf-field>span{font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--fg3)}
@@ -143,22 +145,161 @@
 .stf-modal-actions{display:flex;gap:10px;margin-left:auto}
 
 /* ============================================================
-   2 · WORKING DOCUMENTS
+   SHARED — filter bar, pills, chips (Library + Contacts)
    ============================================================ */
-.stf-wgroup{margin-bottom:4px}
-.stf-wgroup .mem-sec-h svg{vertical-align:-2px;margin-right:7px;color:var(--green-600)}
-.stf-wrow{display:grid;grid-template-columns:54px minmax(0,1fr) 90px 90px 36px;gap:16px;align-items:center;padding:14px 22px;border-top:1px solid var(--line);transition:background .14s}
+.stf-pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.stf-pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--fg2);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-pill);padding:8px 13px;cursor:pointer;transition:all .14s}
+.stf-pill:hover{border-color:var(--green-300);color:var(--ink-900)}
+.stf-pill svg{flex:0 0 auto;color:var(--green-500)}
+.stf-pill.on{background:var(--green-600);border-color:var(--green-600);color:#fff}
+.stf-pill.on svg{color:#fff}
+.stf-pill.on .stf-pill-n{background:rgba(255,255,255,.18);color:#fff}
+.stf-pill-n{font-family:var(--font-mono);font-size:11px;color:var(--green-700);background:var(--green-50);padding:1px 7px;border-radius:var(--radius-pill)}
+
+.stf-filterbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.stf-libsearch{flex:1;min-width:200px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1.5px solid var(--line-strong);
+  border-radius:var(--radius-pill);padding:0 14px;transition:border-color .15s,box-shadow .15s}
+.stf-libsearch:focus-within{border-color:var(--green-400);box-shadow:0 0 0 3px var(--green-100)}
+.stf-libsearch svg{color:var(--fg3);flex:0 0 auto}
+.stf-libsearch input{flex:1;border:none;outline:none;background:none;font-family:var(--font-body);font-size:14px;padding:10px 0;color:var(--ink-900)}
+.stf-selwrap{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line-strong);border-radius:var(--radius-pill);padding:0 12px;transition:border-color .15s,box-shadow .15s}
+.stf-selwrap:focus-within{border-color:var(--green-400);box-shadow:0 0 0 3px var(--green-100)}
+.stf-selwrap svg{color:var(--fg3);flex:0 0 auto}
+.stf-selwrap select{border:none;outline:none;background:none;font-family:var(--font-body);font-size:13.5px;color:var(--ink-900);padding:10px 0;cursor:pointer;appearance:none}
+.stf-chip{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);
+  border-radius:var(--radius-pill);padding:8px 13px;cursor:pointer;transition:all .14s;white-space:nowrap}
+.stf-chip:hover{background:var(--green-100)}
+
+.stf-empty{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-top:4px}
+.stf-empty p{max-width:30em}
+.stf-empty-inline{font-size:14px;color:var(--fg2);padding:6px 0}
+
+/* ============================================================
+   2 · LIBRARY
+   ============================================================ */
+.stf-lib-searchnote{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.stf-lib-searchnote span{display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--ink-900)}
+.stf-lib-searchnote svg{color:var(--green-500)}
+
+.stf-lib-list{margin-top:2px}
+.stf-lib-head{display:grid;grid-template-columns:minmax(0,1fr) 180px 130px 110px 130px 20px;gap:16px;align-items:center;padding:12px 22px;
+  background:var(--paper);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)}
+.stf-librow{display:grid;grid-template-columns:minmax(0,1fr) 180px 130px 110px 130px 20px;gap:16px;align-items:center;width:100%;text-align:left;
+  font-family:var(--font-body);background:none;border:none;border-top:1px solid var(--line);padding:14px 22px;cursor:pointer;transition:background .14s}
+.stf-lib-list .stf-librow:first-of-type{border-top:none}
+.stf-librow:hover{background:var(--green-50)}
+.stf-librow>svg{color:var(--green-400);flex:0 0 auto}
+.stf-lib-sub{font-size:12px;color:var(--fg3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-lib-coll{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ============================================================
+   3 · CONTACTS
+   ============================================================ */
+.stf-team-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.stf-team-head .mhome-head{margin-bottom:0;flex:1;min-width:280px}
+.stf-import{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.stf-import-note{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.02em;color:var(--fg3);text-align:right}
+
+/* People · Organisations toggle */
+.stf-toggle{display:inline-flex;gap:4px;background:var(--mist);border:1px solid var(--line);border-radius:var(--radius-pill);padding:4px;margin:6px 0 18px}
+.stf-toggle-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-body);font-size:13.5px;font-weight:600;color:var(--fg2);
+  background:none;border:none;padding:9px 16px;border-radius:var(--radius-pill);cursor:pointer;transition:all .14s}
+.stf-toggle-btn svg{flex:0 0 auto}
+.stf-toggle-btn:hover{color:var(--ink-900)}
+.stf-toggle-btn.on{background:var(--green-600);color:#fff;box-shadow:var(--shadow-sm)}
+.stf-toggle-btn.on .stf-pill-n{background:rgba(255,255,255,.18);color:#fff}
+
+/* people table */
+.stf-ppl-head{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 140px 110px 130px 20px;gap:16px;align-items:center;padding:12px 22px;
+  background:var(--paper);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)}
+.stf-pplrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 140px 110px 130px 20px;gap:16px;align-items:center;width:100%;text-align:left;
+  font-family:var(--font-body);background:none;border:none;border-top:1px solid var(--line);padding:13px 22px;cursor:pointer;transition:background .14s}
+.stf-people-list .stf-pplrow:first-of-type{border-top:none}
+.stf-pplrow:hover{background:var(--green-50)}
+.stf-pplrow>svg{color:var(--green-400);flex:0 0 auto}
+.stf-ppl-name-cell{display:flex;align-items:center;gap:12px;min-width:0}
+
+/* type + status chips */
+.stf-typechip{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.02em;font-weight:600;
+  padding:4px 9px;border-radius:var(--radius-pill);white-space:nowrap;background:var(--mist);color:var(--ink-500);border:1px solid var(--cloud)}
+.stf-type-client{background:var(--green-50);color:var(--green-700);border-color:var(--green-100)}
+.stf-type-funderdonor{background:#FBF1DE;color:#9A6A12;border-color:#F2E2C2}
+.stf-type-associate{background:#EAF2FE;color:#2A6FDB;border-color:#D5E4FC}
+.stf-type-partner{background:var(--green-50);color:var(--green-600);border-color:var(--green-100)}
+.stf-type-supplier{background:var(--mist);color:var(--ink-500);border-color:var(--cloud)}
+.stf-type-prospect{background:#F4EEFb;color:#6B5BD2;border-color:#E4DcF6}
+.stf-statuschip{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;
+  color:var(--ink-500);background:var(--mist);border:1px solid var(--cloud);padding:4px 9px;border-radius:var(--radius-pill);white-space:nowrap}
+.stf-statuschip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink-400);flex:0 0 auto}
+.stf-statuschip.on{color:var(--green-700);background:var(--green-50);border-color:var(--green-100)}
+.stf-statuschip.on::before{background:var(--green-500)}
+.stf-statuschip.prospect{color:#9A6A12;background:#FBF1DE;border-color:#F2E2C2}
+.stf-statuschip.prospect::before{background:#D9A23B}
+.stf-tag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.02em;color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);
+  padding:4px 9px;border-radius:var(--radius-pill);white-space:nowrap}
+
+/* organisation cards */
+.stf-orggrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.stf-orgcard{text-align:left;font-family:var(--font-body);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;cursor:pointer;display:flex;flex-direction:column;gap:15px;transition:transform .18s,box-shadow .18s,border-color .18s}
+.stf-orgcard:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--green-200)}
+.stf-org-ic{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:13px;background:var(--green-50);color:var(--green-600);flex:0 0 auto}
+.stf-org-ic.lg{width:62px;height:62px;border-radius:18px}
+.stf-org-body{display:flex;flex-direction:column;gap:4px;flex:1}
+.stf-org-name{font-family:var(--font-display);font-weight:700;font-size:1.05rem;color:var(--ink-900);line-height:1.25}
+.stf-org-type{font-size:12.5px;color:var(--fg2)}
+.stf-org-foot{display:flex;align-items:center;gap:14px;padding-top:14px;border-top:1px solid var(--line)}
+.stf-org-stat{font-family:var(--font-mono);font-size:11.5px;color:var(--green-700)}
+.stf-org-foot>svg{margin-left:auto;color:var(--green-400)}
+
+/* person / org detail hero */
+.stf-person-hero{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:24px 26px;margin-bottom:24px;flex-wrap:wrap}
+.stf-person-hero-id{flex:1;min-width:220px}
+.stf-person-hero-name{font-family:var(--font-display);font-weight:700;font-size:1.7rem;letter-spacing:-.02em;color:var(--ink-900);margin:0 0 6px;line-height:1.1}
+.stf-person-hero-role{font-size:14.5px;color:var(--fg2);margin:0 0 12px}
+.stf-person-hero-chips{display:flex;flex-wrap:wrap;gap:8px}
+.stf-person-hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.stf-contact-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-body);font-size:13.5px;font-weight:600;color:#fff;
+  background:var(--green-600);border:1px solid var(--green-600);border-radius:var(--radius-pill);padding:9px 15px;cursor:pointer;transition:all .14s}
+.stf-contact-btn:hover{background:var(--green-700);border-color:var(--green-700)}
+.stf-contact-btn.ghost{background:var(--green-50);color:var(--green-700);border-color:var(--green-100)}
+.stf-contact-btn.ghost:hover{background:var(--green-100)}
+.stf-contact-btn svg{flex:0 0 auto}
+
+.stf-link{color:var(--green-700);font-weight:600;text-decoration:none;word-break:break-word}
+.stf-link:hover{color:var(--green-900);text-decoration:underline}
+.stf-linkbtn{background:none;border:none;font-family:var(--font-body);font-size:13.5px;padding:0;cursor:pointer;text-align:left}
+
+/* history of contact timeline */
+.stf-timeline{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:6px 20px 18px}
+.stf-tl-item{display:flex;gap:14px;padding:14px 0 0;position:relative}
+.stf-tl-item::before{content:"";position:absolute;left:5px;top:20px;bottom:-14px;width:1.5px;background:var(--line)}
+.stf-tl-item:last-of-type::before{display:none}
+.stf-tl-dot{width:11px;height:11px;border-radius:50%;background:var(--green-500);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--green-200);flex:0 0 auto;margin-top:3px;position:relative;z-index:1}
+.stf-tl-body{display:flex;flex-direction:column;gap:2px;padding-bottom:4px}
+.stf-tl-t{font-size:14px;color:var(--ink-900);font-weight:500;line-height:1.4}
+.stf-tl-d{font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;color:var(--fg3)}
+.stf-tl-log{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:16px;font-family:var(--font-body);font-size:13px;font-weight:600;
+  color:var(--green-700);background:var(--green-50);border:1px dashed var(--green-200);border-radius:var(--radius-pill);padding:8px 14px;cursor:pointer;transition:all .14s}
+.stf-tl-log:hover{background:var(--green-100);border-style:solid}
+
+/* a lightweight document/project row (reused in detail views) */
+.stf-wrow{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 22px;border-top:1px solid var(--line);transition:background .14s}
 .stf-list .stf-wrow:first-of-type{border-top:none}
 .stf-wrow:hover{background:var(--green-50)}
 .stf-wrow>.doc-type{grid-column:1}
-.stf-wmeta{font-size:12.5px}
-.stf-wver{font-family:var(--font-mono);font-size:12px;color:var(--fg2);text-align:left}
-.stf-wopen{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--radius-sm);
-  background:var(--paper);border:1px solid var(--line);color:var(--green-600);cursor:pointer;transition:all .14s}
-.stf-wopen:hover{background:var(--green-50);border-color:var(--green-300)}
+button.stf-wrow{width:100%;text-align:left;font-family:var(--font-body);background:none;border:none;border-top:1px solid var(--line);cursor:pointer}
+.stf-list button.stf-wrow:first-of-type{border-top:none}
+.stf-orgppl>svg{color:var(--green-400);flex:0 0 auto}
+.stf-projrow{grid-template-columns:88px minmax(0,1fr) auto}
+.stf-proj-stage{display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.02em;
+  text-transform:uppercase;color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);border-radius:var(--radius-pill);padding:5px 8px;white-space:nowrap}
+.stf-projrow-region{font-family:var(--font-mono);font-size:11px;color:var(--fg3);white-space:nowrap}
 
 /* ============================================================
-   3 · WEBSITE RUNBOOK
+   4 · WEBSITE GUIDE
    ============================================================ */
 .stf-rb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .stf-rb-card{text-align:left;font-family:var(--font-body);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
@@ -179,24 +320,6 @@
 .stf-rel-on[disabled]:hover{border-color:var(--green-300) !important;background:var(--green-50) !important}
 
 /* ============================================================
-   4 · TEAM
-   ============================================================ */
-.stf-team-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.stf-team-head .mhome-head{margin-bottom:0}
-.stf-team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.stf-person{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;transition:border-color .16s,box-shadow .16s}
-.stf-person:hover{border-color:var(--green-200);box-shadow:var(--shadow-sm)}
-.stf-person-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.stf-person-name{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink-900);line-height:1.25}
-.stf-person-role{font-size:12.5px;color:var(--fg2);line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stf-person-regions{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.02em;color:var(--fg3);margin-top:3px}
-.stf-status{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;
-  color:var(--ink-500);background:var(--mist);border:1px solid var(--cloud);padding:4px 9px;border-radius:var(--radius-pill);white-space:nowrap;flex:0 0 auto}
-.stf-status-dot{width:6px;height:6px;border-radius:50%;background:var(--ink-400)}
-.stf-status.on{color:var(--green-700);background:var(--green-50);border-color:var(--green-100)}
-.stf-status.on .stf-status-dot{background:var(--green-500)}
-
-/* ============================================================
    RESPONSIVE
    ============================================================ */
 
@@ -205,11 +328,11 @@
 @media (max-width:1080px){
   .stf-onramps{grid-template-columns:repeat(2,1fr)}
   .stf-rb-grid{grid-template-columns:1fr}
-  .stf-team-grid{grid-template-columns:repeat(2,1fr)}
+  .stf-orggrid{grid-template-columns:1fr}
   .stf-flow{flex-wrap:wrap;gap:14px}
   .stf-flow-step{flex:1 1 100%}
   .stf-flow-arrow{transform:rotate(90deg);flex:1 1 100%;justify-content:center}
-  /* inbox: keep File + Source + Status; drop From / Received / Size */
+  /* inbox: keep File + Came-from + Status; drop Sent-by / Arrived / Size */
   .stf-listhead{grid-template-columns:minmax(0,1fr) 150px 120px}
   .stf-row{grid-template-columns:minmax(0,1fr) 150px 120px}
   .stf-listhead .stf-col:nth-child(3),
@@ -217,7 +340,21 @@
   .stf-listhead .stf-col:nth-child(5),
   .stf-row>.stf-from,
   .stf-row .stf-col.stf-meta{display:none}
-  /* triage modal: stack the two panels */
+  /* library: drop Owner + Updated columns */
+  .stf-lib-head{grid-template-columns:minmax(0,1fr) 160px 120px 20px}
+  .stf-librow{grid-template-columns:minmax(0,1fr) 160px 120px 20px}
+  .stf-lib-head .stf-col:nth-child(4),
+  .stf-lib-head .stf-col:nth-child(5),
+  .stf-librow>.stf-col:nth-child(4),
+  .stf-librow>.stf-col:nth-child(5){display:none}
+  /* people: drop Type + Last-contact columns */
+  .stf-ppl-head{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 110px 20px}
+  .stf-pplrow{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 110px 20px}
+  .stf-ppl-head .stf-col:nth-child(3),
+  .stf-ppl-head .stf-col:nth-child(5),
+  .stf-pplrow>.stf-col:nth-child(3),
+  .stf-pplrow>.stf-col:nth-child(5){display:none}
+  /* file-it modal: stack the two panels */
   .stf-triage{grid-template-columns:1fr}
   .stf-triage-arrow{transform:rotate(90deg)}
 }
@@ -226,23 +363,20 @@
 @media (max-width:768px){
   .stf-onramps{grid-template-columns:repeat(2,1fr)}
   .stf-stats{grid-template-columns:repeat(3,1fr)} /* keep 3-up at 768 */
-  .stf-team-grid{grid-template-columns:repeat(2,1fr)}
+  .stf-orggrid{grid-template-columns:1fr}
   .stf-rb-grid{grid-template-columns:1fr}
-  /* working doc row: drop version column */
-  .stf-wrow{grid-template-columns:46px minmax(0,1fr) 80px 36px}
-  .stf-wver{display:none}
-  /* modal: comfortable margins on a tablet */
+  .stf-filterbar{gap:8px}
+  .stf-libsearch{flex:1 1 100%;order:-1}
+  /* file-it modal: comfortable margins on a tablet */
   .stf-modal{max-width:calc(100vw - 32px);padding:26px 22px}
-  /* field row: stack version/owner fields */
-  .stf-field-row{grid-template-columns:1fr}
 }
 
-/* ── 600px: the inbox table → stacked cards ─────────────── */
+/* ── 600px: stacked / card mode ─────────────── */
 @media (max-width:600px){
-  /* on-ramps: 2-up → 1-up */
+  /* ways in: 2-up → 1-up */
   .stf-onramps{grid-template-columns:1fr}
 
-  /* pipeline strip: already wraps at 1080; ensure no overflow */
+  /* flow strip: already wraps at 1080; ensure no overflow */
   .stf-flow{padding:14px 16px}
   .stf-flow-step{gap:10px}
 
@@ -250,75 +384,58 @@
   .stf-stats{grid-template-columns:1fr;gap:10px}
 
   /* ── INBOX TABLE → CARD MODE ── */
-  .stf-listhead{display:none} /* hide column headers */
-
-  /* Each row becomes a flex column card */
+  .stf-listhead{display:none}
   .stf-list{gap:0}
-  .stf-row{
-    display:flex;
-    flex-direction:column;
-    gap:0;
-    padding:16px 16px 12px;
-    border-top:1px solid var(--line);
-  }
+  .stf-row{display:flex;flex-direction:column;gap:0;padding:16px 16px 12px;border-top:1px solid var(--line)}
   .stf-list .stf-row:first-of-type{border-top:none}
-
-  /* Filename block: allow wrapping */
   .stf-file{align-items:flex-start;gap:10px;margin-bottom:10px}
   .stf-file-name{white-space:normal;font-size:14px}
-
-  /* Hide all .stf-col spans by default in card mode */
   .stf-row>.stf-col{display:none}
-
-  /* Re-show: source chip (2nd child) and from avatar (3rd child) together
-     as a small inline meta row, Received/Size stay hidden */
-  .stf-row>.stf-col:nth-child(2){
-    display:inline-flex;
-    align-items:center;
-    margin-bottom:8px;
-  }
-  .stf-row>.stf-from{
-    display:inline-flex !important;
-    align-items:center;
-    gap:6px;
-    margin-bottom:8px;
-    margin-left:8px;
-    font-size:12.5px;
-  }
-  /* The 4th and 5th children (received, size) stay hidden (display:none from above) */
-
-  /* Action button: full-width */
-  .stf-row>.stf-col-act{
-    display:flex !important;
-    justify-content:flex-start;
-    margin-top:4px;
-  }
+  .stf-row>.stf-col:nth-child(2){display:inline-flex;align-items:center;margin-bottom:8px}
+  .stf-row>.stf-from{display:inline-flex !important;align-items:center;gap:6px;margin-bottom:8px;margin-left:8px;font-size:12.5px}
+  .stf-row>.stf-col-act{display:flex !important;justify-content:flex-start;margin-top:4px}
   .stf-fileit{width:100%;justify-content:center}
 
-  /* working docs */
-  .stf-wrow{grid-template-columns:36px minmax(0,1fr) auto;gap:10px;padding:12px 14px}
-  .stf-wrow .stf-wver{display:none}
-  .stf-wmeta{font-size:12px}
+  /* ── LIBRARY → CARD MODE ── */
+  .stf-lib-head{display:none}
+  .stf-librow{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:14px 16px 12px}
+  .stf-librow>.stf-file{margin-bottom:10px}
+  .stf-librow .stf-file-name{white-space:normal}
+  .stf-librow>.stf-col{display:none}
+  .stf-librow>.stf-col:nth-child(3){display:inline-flex;margin-bottom:6px} /* who-can-see-it badge */
+  .stf-librow>.stf-col:nth-child(2){display:inline-flex;margin-bottom:8px;font-size:12px;color:var(--fg3)} /* collection */
+  .stf-librow>svg{display:none}
 
-  /* runbook cards: single col already; no extra rule needed */
+  /* ── PEOPLE → CARD MODE ── */
+  .stf-ppl-head{display:none}
+  .stf-pplrow{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:14px 16px 12px}
+  .stf-ppl-name-cell{margin-bottom:10px}
+  .stf-pplrow .stf-file-name{white-space:normal}
+  .stf-pplrow>.stf-col{display:none !important}
+  .stf-pplrow>.stf-col:nth-child(3){display:inline-flex !important;margin-bottom:6px} /* type */
+  .stf-pplrow>.stf-col:nth-child(4){display:inline-flex !important;margin-bottom:6px;margin-left:8px} /* status */
+  .stf-pplrow>svg{display:none}
 
-  /* team: one column */
-  .stf-team-grid{grid-template-columns:1fr}
+  /* contacts header: stack import button */
+  .stf-import{align-items:flex-start}
+  .stf-import-note{text-align:left}
 
-  /* triage modal: full-width with safe margins, scrollable */
+  /* project rows: drop region */
+  .stf-projrow{grid-template-columns:auto minmax(0,1fr)}
+  .stf-projrow-region{display:none}
+
+  /* person hero actions: full width */
+  .stf-person-hero{padding:20px 18px}
+  .stf-person-hero-actions{width:100%}
+  .stf-contact-btn{flex:1;justify-content:center}
+
+  /* file-it modal: full-width with safe margins, scrollable */
   .stf-modal-scrim{padding:12px}
-  .stf-modal{
-    max-width:100%;
-    padding:20px 16px;
-    max-height:calc(100vh - 24px);
-    border-radius:var(--radius-md, 14px);
-  }
+  .stf-modal{max-width:100%;padding:20px 16px;max-height:calc(100vh - 24px);border-radius:14px}
   .stf-modal-h{font-size:1.15rem;margin-bottom:14px}
-  /* stacked triage already applied at 1080 */
   .stf-modal-foot{flex-direction:column;align-items:flex-start;gap:12px}
   .stf-modal-actions{margin-left:0;width:100%;display:flex;gap:8px}
   .stf-modal-actions .btn{flex:1;justify-content:center}
-  /* seg buttons: wrap if needed */
   .stf-seg{flex-wrap:wrap}
   .stf-seg-btn{flex:1 1 auto}
 }

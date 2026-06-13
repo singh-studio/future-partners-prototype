@@ -1,203 +1,470 @@
 /* staffSpace.jsx — Staff workspace: the private back-office for Kirsty & the core team.
-   Centrepiece = the Ingestion Inbox: many on-ramps → one durable home → a triage step
-   that files each incoming item into the library.
+   Four areas: Incoming (files however they arrive) · Library (every filed document) ·
+   Contacts (people & organisations — a light address book with history) · Website guide.
+   Plain, consumer-facing language throughout — written for a non-technical reader.
    Defines a global StaffSpace({signOut, switcher}). Prefix for new CSS: stf-. */
 
 /* =====================================================================
-   SOURCE PROVENANCE — each incoming item remembers where it came from.
-   Distinct colour + icon per source; WeTransfer carries an expiry, which is
-   the whole reason a durable copy is captured on arrival.
+   WHERE A FILE CAME FROM — each incoming item remembers its source.
+   Distinct colour + icon per source. WeTransfer links expire, which is the
+   whole reason we save a copy here the moment a file arrives.
    ===================================================================== */
 const STF_SOURCES = {
-  dropbox:     {label:"Dropbox",       icon:"folder", color:"#0B6CFF", ephemeral:false},
-  drive:       {label:"Google Drive",  icon:"layers", color:"#1F8A5B", ephemeral:false},
-  wetransfer:  {label:"WeTransfer",    icon:"clock",  color:"#D9742B", ephemeral:true},
-  email:       {label:"Email-in",      icon:"mail",   color:"#6B5BD2", ephemeral:false},
-  upload:      {label:"Direct upload", icon:"download", color:"#157F69", ephemeral:false},
+  dropbox:     {label:"Dropbox",       icon:"folder",   color:"#0B6CFF", ephemeral:false},
+  drive:       {label:"Google Drive",  icon:"layers",   color:"#1F8A5B", ephemeral:false},
+  wetransfer:  {label:"WeTransfer",    icon:"clock",    color:"#D9742B", ephemeral:true},
+  email:       {label:"Email",         icon:"mail",     color:"#6B5BD2", ephemeral:false},
+  upload:      {label:"Uploaded here", icon:"download", color:"#157F69", ephemeral:false},
 };
 
-/* The on-ramps shown at the top of the inbox */
+/* The ways files can arrive, shown at the top of Incoming */
 const STF_ONRAMPS = [
-  {id:"upload", icon:"download", title:"Drag & drop", sub:"Drop files straight in — they land here for filing.", tag:null},
-  {id:"link",   icon:"link",    title:"Paste a link", sub:"Dropbox · Drive · WeTransfer. We fetch a permanent copy.", tag:null},
-  {id:"email",  icon:"mail",    title:"Email them in", sub:"Forward attachments to files@futurepartners.co.nz", tag:null},
-  {id:"connect",icon:"globe",   title:"Connected folders", sub:"Auto-pull from a shared Drive or Dropbox.", tag:"Optional · later"},
+  {id:"upload", icon:"download", title:"Drag & drop", sub:"Drop files straight in — they land here, ready to file.", tag:null},
+  {id:"link",   icon:"link",    title:"Paste a link", sub:"Dropbox, Drive or WeTransfer. We save a copy here, so it never expires.", tag:null},
+  {id:"email",  icon:"mail",    title:"Email them in", sub:"Forward attachments to the address below — they appear here.", tag:null},
+  {id:"connect",icon:"globe",   title:"Connected folders", sub:"Pull in files automatically from a shared Drive or Dropbox.", tag:"Optional · later"},
 ];
 
-/* The collections an item can be filed into (triage target) */
-const STF_COLLECTIONS = ["Policies & governance","Templates","Guides & how-tos","Brand & collateral","Client deliverable","Financials & admin"];
-const STF_AUDIENCES   = [
-  {id:"client",    label:"Client"},
-  {id:"associate", label:"Associate"},
-  {id:"staff",     label:"Staff"},
-  {id:"public",    label:"Public"},
+/* The collections a file can be filed into */
+const STF_COLLECTIONS = ["Policies & governance","Templates","Guides & how-tos","Brand & collateral","Client deliverables","Financials & admin","Team documents"];
+
+/* Who can see a filed document (plain words, not "audience") */
+const STF_AUDIENCES = [
+  {id:"public",    label:"Everyone"},
+  {id:"client",    label:"Clients"},
+  {id:"associate", label:"Associates"},
+  {id:"staff",     label:"Team only"},
 ];
+const audLabel = id => (STF_AUDIENCES.find(a=>a.id===id)||{}).label || "Team only";
 
 /* =====================================================================
-   THE INBOX — ~9 mock incoming items from real associates (PEOPLE), via
-   many systems. Status: needs filing | filed. expiresIn marks rotting links.
+   INCOMING — ~9 files that have just arrived from real associates (PEOPLE),
+   through different systems. status: needs | filed. expiresIn marks a link
+   that is about to die (the reason we keep our own copy).
    ===================================================================== */
 const STF_INBOX = [
-  {id:"i1", name:"Kōtui evaluation — final draft.docx",        type:"DOCX", source:"wetransfer", from:"eileen",   received:"Today · 09:12",   size:"4.2 MB",  status:"needs", expiresIn:2, suggest:"Client deliverable"},
-  {id:"i2", name:"Nauru health systems — field photos.zip",     type:"ZIP",  source:"wetransfer", from:"david",    received:"Today · 08:47",   size:"312 MB", status:"needs", expiresIn:2, suggest:"Client deliverable"},
-  {id:"i3", name:"Tuvalu fisheries HRD plan v4.docx",           type:"DOCX", source:"email",      from:"ian",      received:"Yesterday · 17:30",size:"1.1 MB",  status:"needs", expiresIn:null, suggest:"Client deliverable"},
+  {id:"i1", name:"Kōtui evaluation — final draft.docx",        type:"DOCX", source:"wetransfer", from:"eileen",   received:"Today · 09:12",   size:"4.2 MB",  status:"needs", expiresIn:2, suggest:"Client deliverables"},
+  {id:"i2", name:"Nauru health systems — field photos.zip",     type:"ZIP",  source:"wetransfer", from:"david",    received:"Today · 08:47",   size:"312 MB", status:"needs", expiresIn:2, suggest:"Client deliverables"},
+  {id:"i3", name:"Tuvalu fisheries HRD plan v4.docx",           type:"DOCX", source:"email",      from:"ian",      received:"Yesterday · 17:30",size:"1.1 MB",  status:"needs", expiresIn:null, suggest:"Client deliverables"},
   {id:"i4", name:"Niue GCF accreditation — financials.xlsx",    type:"XLSX", source:"dropbox",    from:"brucetta", received:"Yesterday · 14:05",size:"680 KB",  status:"needs", expiresIn:null, suggest:"Financials & admin"},
-  {id:"i5", name:"Timor forestry strategy — annexes.pdf",       type:"PDF",  source:"drive",      from:"elvino",   received:"Yesterday · 11:18",size:"8.9 MB",  status:"needs", expiresIn:null, suggest:"Client deliverable"},
-  {id:"i6", name:"Save the Children eval — inception report.pdf",type:"PDF",  source:"email",      from:"elisabeth",received:"2 days ago",      size:"2.3 MB",  status:"needs", expiresIn:null, suggest:"Client deliverable"},
+  {id:"i5", name:"Timor forestry strategy — annexes.pdf",       type:"PDF",  source:"drive",      from:"elvino",   received:"Yesterday · 11:18",size:"8.9 MB",  status:"needs", expiresIn:null, suggest:"Client deliverables"},
+  {id:"i6", name:"Save the Children eval — inception report.pdf",type:"PDF",  source:"email",      from:"elisabeth",received:"2 days ago",      size:"2.3 MB",  status:"needs", expiresIn:null, suggest:"Client deliverables"},
   {id:"i7", name:"Updated capability statement.pdf",            type:"PDF",  source:"upload",     from:"kirsty",   received:"2 days ago",      size:"1.7 MB",  status:"needs", expiresIn:null, suggest:"Brand & collateral"},
-  {id:"i8", name:"Pacific Broadcasting review — slide deck.pptx",type:"PPTX", source:"drive",      from:"faka",     received:"3 days ago",      size:"14 MB",   status:"needs", expiresIn:null, suggest:"Client deliverable"},
+  {id:"i8", name:"Pacific Broadcasting review — slide deck.pptx",type:"PPTX", source:"drive",      from:"faka",     received:"3 days ago",      size:"14 MB",   status:"needs", expiresIn:null, suggest:"Client deliverables"},
   {id:"i9", name:"MERL framework template v2.docx",             type:"DOCX", source:"dropbox",    from:"hilary",   received:"3 days ago",      size:"540 KB",  status:"needs", expiresIn:null, suggest:"Templates"},
-  /* one already filed, to show the after-state */
-  {id:"i10",name:"Child Safeguarding Policy v3.1.pdf",          type:"PDF",  source:"upload",     from:"kirsty",   received:"Last week",       size:"890 KB",  status:"filed", expiresIn:null, suggest:"Policies & governance", filedAs:{collection:"Policies & governance", audience:"associate", version:"v3.1"}},
 ];
 
 /* =====================================================================
-   WORKING DOCUMENTS — internal back-office, audience: staff. Lighter.
+   LIBRARY — the home for every filed document. Seeded from three places so
+   the filters feel real: documents already filed from Incoming, the practice's
+   internal records (the old "Working documents", now the Team documents
+   collection), and a handful of library staples.
+   Shape: { id, name, type, collection, audience, owner, updated, size, source?, from? }
+   A document can carry a `body` (reader content) or fall back to a placeholder.
    ===================================================================== */
-const STF_WORKING = [
-  {group:"Proposals & pipeline", icon:"compass", docs:[
-    {id:"w1", title:"Live proposals tracker", type:"XLSX", owner:"Kirsty Burnett", updated:"Today",      version:"live",  lifecycle:"current"},
-    {id:"w2", title:"Pipeline — Q3 opportunities", type:"XLSX", owner:"Kirsty Burnett", updated:"This week", version:"live", lifecycle:"current"},
-    {id:"w3", title:"MFAT panel — capability response (draft)", type:"DOCX", owner:"Kirsty Burnett", updated:"Yesterday", version:"v0.6", lifecycle:"draft"},
-  ]},
-  {group:"Engagement admin", icon:"clock", docs:[
-    {id:"w4", title:"Engagement tracker — active assignments", type:"XLSX", owner:"Kirsty Burnett", updated:"Today", version:"live", lifecycle:"current"},
-    {id:"w5", title:"Associate timesheets — June", type:"XLSX", owner:"Admin", updated:"This week", version:"live", lifecycle:"current"},
-    {id:"w6", title:"Travel & in-country logistics log", type:"XLSX", owner:"Admin", updated:"Last week", version:"live", lifecycle:"current"},
-  ]},
-  {group:"Financials", icon:"layers", docs:[
-    {id:"w7", title:"FY26 financial model", type:"XLSX", owner:"Kirsty Burnett", updated:"This week", version:"v3.2", lifecycle:"current"},
-    {id:"w8", title:"Invoicing & receivables", type:"XLSX", owner:"Admin", updated:"Today", version:"live", lifecycle:"current"},
-    {id:"w9", title:"Subcontractor rate card", type:"PDF", owner:"Kirsty Burnett", updated:"Mar 2026", version:"v1.4", lifecycle:"current"},
-  ]},
-  {group:"Contracts & agreements", icon:"shield", docs:[
-    {id:"w10", title:"Associate agreement — master template", type:"DOCX", owner:"Kirsty Burnett", updated:"Feb 2026", version:"v2.1", lifecycle:"current"},
-    {id:"w11", title:"Client MSA — signed register", type:"XLSX", owner:"Admin", updated:"This week", version:"live", lifecycle:"current"},
-    {id:"w12", title:"NDA — standard form", type:"PDF", owner:"Admin", updated:"Jan 2026", version:"v1.2", lifecycle:"current"},
-    {id:"w13", title:"2022 engagement contracts", type:"ZIP", owner:"Admin", updated:"2022", version:"final", lifecycle:"archived"},
-  ]},
-];
-
-/* =====================================================================
-   WEBSITE RUNBOOK — "how this website actually works". Kirsty asked for it.
-   Real-ish, genuinely useful, clearly draft. Reader bodies reuse .mdoc-doc.
-   ===================================================================== */
-const STF_RUNBOOK = [
-  {id:"r1", title:"Tech stack & architecture", type:"Web", icon:"layers", updated:"Jun 2026", summary:"What the site is built on today, and the planned production architecture.",
+const STF_LIBRARY_SEED = [
+  /* —— already filed from Incoming —— */
+  {id:"L1", name:"Child Safeguarding Policy v3.1.pdf", type:"PDF", collection:"Policies & governance", audience:"associate", owner:"Kirsty Burnett", updated:"Last week", size:"890 KB", source:"upload", from:"kirsty",
    body:[
-     {p:"This page is an honest snapshot of how the Future Partners website is put together — today, and where it is heading. It is a working draft, kept current as decisions land."},
+     {p:"Future Partners is committed to the safety, wellbeing and dignity of every child who comes into contact with our work. This policy sets out the standards we hold ourselves to, and what every associate must do."},
+     {h:"Who this applies to"},
+     {p:"Everyone working under the Future Partners name — directors, associates, sub-contractors and partners — on every assignment, in every country, whether contact with children is direct or indirect."},
+     {h:"Reporting a concern"},
+     {p:"Any concern about the safety of a child is reported to the Director within 24 hours, and to local authorities where required. Reports are handled in confidence, taken seriously, and never result in retaliation. When in doubt, report."},
+   ]},
+  {id:"L2", name:"Kōtui evaluation — 2024 report.pdf", type:"PDF", collection:"Client deliverables", audience:"client", owner:"Kirsty Burnett", updated:"Last month", size:"6.4 MB", source:"wetransfer", from:"eileen"},
+  {id:"L3", name:"Nauru health systems review.docx", type:"DOCX", collection:"Client deliverables", audience:"client", owner:"Dr David Angelson", updated:"May 2026", size:"3.1 MB", source:"email", from:"david"},
+  {id:"L4", name:"MERL framework template.docx", type:"DOCX", collection:"Templates", audience:"associate", owner:"Hilary Gorman", updated:"Apr 2026", size:"540 KB", source:"dropbox", from:"hilary"},
+
+  /* —— library staples —— */
+  {id:"L5", name:"Code of Conduct.pdf", type:"PDF", collection:"Policies & governance", audience:"associate", owner:"Kirsty Burnett", updated:"Mar 2026", size:"420 KB",
+   body:[
+     {p:"The standards of behaviour expected of everyone working under the Future Partners name — honest, respectful, and always in the best interests of the communities we work with."},
+     {h:"In short"},
+     {list:["Treat people with respect and maintain professional boundaries.","Declare conflicts of interest early and openly.","Protect the information partners and communities trust us with.","Speak up if something is not right — it will be taken seriously."]},
+   ]},
+  {id:"L6", name:"Conflict of Interest Policy.pdf", type:"PDF", collection:"Policies & governance", audience:"associate", owner:"Kirsty Burnett", updated:"Feb 2026", size:"310 KB"},
+  {id:"L7", name:"Health, Safety & Travel Policy.pdf", type:"PDF", collection:"Policies & governance", audience:"associate", owner:"Kirsty Burnett", updated:"Apr 2026", size:"680 KB"},
+  {id:"L8", name:"Project Design template.docx", type:"DOCX", collection:"Templates", audience:"associate", owner:"Future Partners", updated:"May 2026", size:"220 KB"},
+  {id:"L9", name:"Evaluation Terms of Reference.docx", type:"DOCX", collection:"Templates", audience:"associate", owner:"Future Partners", updated:"Apr 2026", size:"180 KB"},
+  {id:"L10", name:"Programme Budget template.xlsx", type:"XLSX", collection:"Templates", audience:"associate", owner:"Future Partners", updated:"Mar 2026", size:"95 KB"},
+  {id:"L11", name:"MERL framework guide.pdf", type:"PDF", collection:"Guides & how-tos", audience:"associate", owner:"Future Partners", updated:"May 2026", size:"1.4 MB",
+   body:[
+     {p:"A good monitoring, evaluation, research and learning (MERL) framework helps the people delivering a project see what is working, adapt, and improve — not just report upward to a donor. This guide sets out how we build MERL that partners actually use."},
+     {h:"Start from the change"},
+     {p:"Begin with a clear theory of change: the outcomes that matter, and the assumptions behind how the project expects to reach them. Indicators follow from the change you are trying to see."},
+     {h:"Close the loop"},
+     {p:"Build in regular moments to review the data together, ask what it means, and adjust. Learning that never changes a decision is not learning."},
+   ]},
+  {id:"L12", name:"Working in the Pacific — protocols.pdf", type:"PDF", collection:"Guides & how-tos", audience:"associate", owner:"Future Partners", updated:"Apr 2026", size:"1.1 MB"},
+  {id:"L13", name:"Logo & brand pack.zip", type:"ZIP", collection:"Brand & collateral", audience:"associate", owner:"Kirsty Burnett", updated:"Mar 2026", size:"24 MB"},
+  {id:"L14", name:"Capability statement.pdf", type:"PDF", collection:"Brand & collateral", audience:"public", owner:"Future Partners", updated:"May 2026", size:"1.7 MB",
+   body:[
+     {p:"A two-page overview of what Future Partners does — services, sectors and proof — written for a first conversation with a new client or funder."},
+     {h:"What we do"},
+     {p:"We work across the whole project cycle — scope, design, fund, plan, deliver, review and improve — alongside local teams in the Pacific and Asia, not from a desk."},
+   ]},
+  {id:"L15", name:"Slide template.pptx", type:"PPTX", collection:"Brand & collateral", audience:"associate", owner:"Future Partners", updated:"Apr 2026", size:"3.8 MB"},
+
+  /* —— team documents (was "Working documents"); Team only —— */
+  {id:"L16", name:"Live proposals tracker.xlsx", type:"XLSX", collection:"Team documents", audience:"staff", owner:"Kirsty Burnett", updated:"Today", size:"210 KB"},
+  {id:"L17", name:"Engagement tracker — active assignments.xlsx", type:"XLSX", collection:"Team documents", audience:"staff", owner:"Kirsty Burnett", updated:"Today", size:"180 KB"},
+  {id:"L18", name:"FY26 financial model.xlsx", type:"XLSX", collection:"Team documents", audience:"staff", owner:"Kirsty Burnett", updated:"This week", size:"320 KB"},
+  {id:"L19", name:"Invoicing & receivables.xlsx", type:"XLSX", collection:"Team documents", audience:"staff", owner:"Admin", updated:"Today", size:"260 KB"},
+  {id:"L20", name:"Associate agreement — master template.docx", type:"DOCX", collection:"Team documents", audience:"staff", owner:"Kirsty Burnett", updated:"Feb 2026", size:"140 KB"},
+  {id:"L21", name:"Subcontractor rate card.pdf", type:"PDF", collection:"Team documents", audience:"staff", owner:"Kirsty Burnett", updated:"Mar 2026", size:"90 KB"},
+];
+
+/* The collections, in order, with the icon used across the app */
+const STF_LIB_COLLECTIONS = [
+  {name:"Policies & governance", icon:"shield"},
+  {name:"Templates",             icon:"file"},
+  {name:"Guides & how-tos",      icon:"book"},
+  {name:"Brand & collateral",    icon:"layers"},
+  {name:"Client deliverables",   icon:"compass"},
+  {name:"Financials & admin",    icon:"clock"},
+  {name:"Team documents",        icon:"lock"},
+];
+
+/* =====================================================================
+   CONTACTS — a light address book with relationship history.
+   Shaped like spreadsheet columns on purpose: Kirsty has a master Excel
+   sheet that will seed this later (see the "Import from spreadsheet" button).
+   People reference an org by name; orgs are derived + enriched below.
+   ===================================================================== */
+const STF_CONTACT_TYPES = ["Client","Funder/Donor","Associate","Partner","Supplier","Prospect"];
+const STF_CONTACT_STATUS = ["Active","Prospect","Past"];
+
+/* Build associate contacts straight from PEOPLE so the roster stays in sync */
+const STF_ASSOCIATE_CONTACTS = PEOPLE.map(p=>({
+  id:"c-"+p.id,
+  personId:p.id,
+  name:p.name,
+  initials:p.initials,
+  fill:p.fill,
+  title:p.role,
+  org:"Future Partners",
+  type:"Associate",
+  status: p.id==="greg" || p.id==="julie" ? "Past" : "Active",
+  email:(p.name.toLowerCase().replace(/[^a-z]+/g,".").replace(/^\.|\.$/g,""))+"@futurepartners.co.nz",
+  phone:"+64 21 0"+(700+(p.name.length*7%300)),
+  location:(p.regions||[])[0]||"Aotearoa NZ",
+  tags:(p.sectors||[]).slice(0,2),
+  cases:p.cases||[],
+  lastContact: p.lead?"Today":["2 days ago","Last week","This week","Last month","Apr 2026"][p.name.length%5],
+  history:[
+    {d:"This week", t:"Assignment check-in call"},
+    {d:"Last month", t:"Sent updated associate agreement"},
+    {d:"Mar 2026", t:"Confirmed availability for upcoming work"},
+  ],
+}));
+
+/* Invented-but-plausible client, funder, partner and prospect contacts at real
+   organisations drawn from CLIENTS / CASES. Hand-written history per person. */
+const STF_EXTERNAL_CONTACTS = [
+  {id:"c-meresia", name:"Meresia Detenamo", initials:"MD", fill:"fill-sea",
+   title:"Director of Public Health", org:"Nauru Ministry of Health", type:"Client", status:"Active",
+   email:"m.detenamo@health.gov.nr", phone:"+674 557 3300", location:"Nauru · Micronesia",
+   tags:["Health","Health systems"], cases:["nauru-health"],
+   history:[
+     {d:"14 Jun", t:"Sent Q2 invoice and progress note"},
+     {d:"2 Jun", t:"Call re systems review report"},
+     {d:"May 2026", t:"In-country workshop — Yaren"},
+     {d:"Mar 2026", t:"Inception report signed off"},
+   ]},
+  {id:"c-tepaeru", name:"Tepaeru Herrmann", initials:"TH", fill:"fill-dawn",
+   title:"Lead Adviser, Pacific Development", org:"MFAT · Manatū Aorere", type:"Funder/Donor", status:"Active",
+   email:"tepaeru.herrmann@mfat.govt.nz", phone:"+64 4 439 8000", location:"Wellington · Aotearoa NZ",
+   tags:["Governance & MERL","Funding"], cases:["oxfam-eval","savechildren-eval","kiribati-waste"],
+   history:[
+     {d:"10 Jun", t:"Proposal sent — Pacific panel response"},
+     {d:"28 May", t:"Quarterly catch-up call"},
+     {d:"Apr 2026", t:"Discussed evaluation findings"},
+     {d:"Feb 2026", t:"Contract variation approved"},
+   ]},
+  {id:"c-naomi", name:"Naomi Watene", initials:"NW", fill:"fill-crossing",
+   title:"Programmes Manager", org:"UNICEF Aotearoa", type:"Client", status:"Active",
+   email:"nwatene@unicef.org.nz", phone:"+64 9 309 0726", location:"Auckland · Aotearoa NZ",
+   tags:["Governance & MERL","Education"], cases:["unicef-merl"],
+   history:[
+     {d:"6 Jun", t:"Shared MERL framework draft"},
+     {d:"22 May", t:"Workshop — outcome indicators"},
+     {d:"Mar 2026", t:"Kicked off framework refresh"},
+   ]},
+  {id:"c-james-oxfam", name:"James Tugaga", initials:"JT", fill:"fill-coast",
+   title:"Pacific Partnerships Lead", org:"Oxfam Aotearoa", type:"Client", status:"Active",
+   email:"jamest@oxfam.org.nz", phone:"+64 4 472 9549", location:"Wellington · Aotearoa NZ",
+   tags:["Governance & MERL"], cases:["oxfam-eval"],
+   history:[
+     {d:"12 Jun", t:"Final Kōtui report delivered"},
+     {d:"30 May", t:"Reviewed draft recommendations"},
+     {d:"Apr 2026", t:"Country visit debrief — PNG"},
+   ]},
+  {id:"c-sarah-stc", name:"Sarah Mafi", initials:"SM", fill:"fill-earth",
+   title:"International Programmes Director", org:"Save the Children NZ", type:"Client", status:"Active",
+   email:"sarah.mafi@savethechildren.org.nz", phone:"+64 4 385 6847", location:"Wellington · Aotearoa NZ",
+   tags:["Education","Health"], cases:["savechildren-eval"],
+   history:[
+     {d:"9 Jun", t:"Inception report received"},
+     {d:"24 May", t:"Evaluation scoping call"},
+     {d:"Apr 2026", t:"Signed engagement letter"},
+   ]},
+  {id:"c-worldbank", name:"Anand Rai", initials:"AR", fill:"fill-sea",
+   title:"Senior Fisheries Specialist", org:"World Bank", type:"Funder/Donor", status:"Past",
+   email:"arai@worldbank.org", phone:"+1 202 473 1000", location:"Washington · regional",
+   tags:["Fisheries & oceans"], cases:["prop-oceanscape"],
+   history:[
+     {d:"2022", t:"PROP review final report accepted"},
+     {d:"2022", t:"Presented findings to task team"},
+   ]},
+  {id:"c-adb", name:"Latu Fifita", initials:"LF", fill:"fill-coast",
+   title:"Climate Finance Officer", org:"Asian Development Bank", type:"Funder/Donor", status:"Active",
+   email:"lfifita@adb.org", phone:"+63 2 8632 4444", location:"Manila · regional",
+   tags:["Climate & environment","WASH"], cases:["childfund-wash"],
+   history:[
+     {d:"5 Jun", t:"Introductory call re WASH partnership"},
+     {d:"Apr 2026", t:"Shared capability statement"},
+   ]},
+  {id:"c-spc", name:"Sione Tuʻihalangingie", initials:"ST", fill:"fill-forest",
+   title:"Biosecurity Adviser", org:"SPC", type:"Partner", status:"Active",
+   email:"sionet@spc.int", phone:"+687 26 20 00", location:"Suva · Pacific regional",
+   tags:["Biosecurity","Climate & environment"], cases:["invasive-species","invasive-resource"],
+   history:[
+     {d:"3 Jun", t:"Coordinated on invasive-species plan"},
+     {d:"May 2026", t:"Joint workshop — regional agencies"},
+   ]},
+  {id:"c-datatorque", name:"Raymond Marshall", initials:"RM", fill:"fill-earth",
+   title:"Chief Operating Officer", org:"DataTorque Ltd", type:"Supplier", status:"Active",
+   email:"r.marshall@datatorque.com", phone:"+64 4 801 8400", location:"Wellington · Aotearoa NZ",
+   tags:["Partnerships"], cases:[],
+   history:[
+     {d:"1 Jun", t:"Referral — possible revenue-systems work"},
+     {d:"Mar 2026", t:"Coffee — network catch-up"},
+   ]},
+  {id:"c-fredhollows", name:"Hana Leota", initials:"HL", fill:"fill-dawn",
+   title:"Pacific Programmes Manager", org:"Fred Hollows Foundation NZ", type:"Prospect", status:"Prospect",
+   email:"hleota@hollows.nz", phone:"+64 9 950 5400", location:"Auckland · Aotearoa NZ",
+   tags:["Health"], cases:["fred-hollows","eye-institute"],
+   history:[
+     {d:"8 Jun", t:"Proposal sent — eye-health scale-up"},
+     {d:"May 2026", t:"Intro call re ATScale business case"},
+   ]},
+  {id:"c-childfund", name:"Tomasi Rabuka", initials:"TR", fill:"fill-crossing",
+   title:"Country Programme Lead", org:"ChildFund NZ", type:"Client", status:"Active",
+   email:"trabuka@childfund.org.nz", phone:"+64 4 471 0300", location:"Tarawa · Micronesia",
+   tags:["WASH"], cases:["childfund-wash"],
+   history:[
+     {d:"4 Jun", t:"WASH design workshop — Kiribati"},
+     {d:"Apr 2026", t:"Confirmed community partners"},
+   ]},
+  {id:"c-prospect-wwf", name:"Eleanor Marsh", initials:"EM", fill:"fill-forest",
+   title:"Conservation Programmes Lead", org:"WWF New Zealand", type:"Prospect", status:"Prospect",
+   email:"emarsh@wwf.org.nz", phone:"+64 4 499 2930", location:"Wellington · Aotearoa NZ",
+   tags:["Climate & environment"], cases:[],
+   history:[
+     {d:"7 Jun", t:"First conversation — possible evaluation"},
+   ]},
+];
+
+const STF_CONTACTS = [...STF_EXTERNAL_CONTACTS, ...STF_ASSOCIATE_CONTACTS];
+
+/* Organisations — derived from the external contacts (plus Future Partners),
+   enriched with a type, region and the projects we link to them. */
+const STF_ORGS = [
+  {name:"Nauru Ministry of Health", type:"Government", region:"Micronesia · Nauru", cases:["nauru-health"]},
+  {name:"MFAT · Manatū Aorere", type:"Funder", region:"Aotearoa NZ", cases:["oxfam-eval","savechildren-eval","kiribati-waste","cook-eval","epbp","market-access"]},
+  {name:"UNICEF Aotearoa", type:"UN agency", region:"Aotearoa NZ", cases:["unicef-merl","wash-decade"]},
+  {name:"Oxfam Aotearoa", type:"NGO", region:"Aotearoa NZ", cases:["oxfam-eval"]},
+  {name:"Save the Children NZ", type:"NGO", region:"Aotearoa NZ", cases:["savechildren-eval"]},
+  {name:"World Bank", type:"Multilateral", region:"Washington · regional", cases:["prop-oceanscape"]},
+  {name:"Asian Development Bank", type:"Multilateral", region:"Manila · regional", cases:["childfund-wash"]},
+  {name:"SPC", type:"Multilateral", region:"Suva · Pacific regional", cases:["invasive-species","invasive-resource","prop-oceanscape"]},
+  {name:"DataTorque Ltd", type:"Crown research", region:"Wellington · Aotearoa NZ", cases:[]},
+  {name:"Fred Hollows Foundation NZ", type:"NGO", region:"Auckland · Aotearoa NZ", cases:["fred-hollows","eye-institute"]},
+  {name:"ChildFund NZ", type:"NGO", region:"Tarawa · Micronesia", cases:["childfund-wash"]},
+  {name:"WWF New Zealand", type:"NGO", region:"Wellington · Aotearoa NZ", cases:[]},
+  {name:"Future Partners", type:"Crown research", region:"Aotearoa NZ", cases:[]},
+];
+const orgByName = name => STF_ORGS.find(o=>o.name===name);
+const contactsForOrg = name => STF_CONTACTS.filter(c=>c.org===name);
+
+/* =====================================================================
+   WEBSITE GUIDE — "how this website actually works". Kirsty asked for it.
+   Honest, genuinely useful, clearly a draft. Reader bodies reuse .mdoc-doc.
+   ===================================================================== */
+const STF_GUIDE = [
+  {id:"r1", title:"What the site is built on", type:"Web", icon:"layers", updated:"Jun 2026", summary:"What the website runs on today, and the plan for the live version.",
+   body:[
+     {p:"This page is an honest snapshot of how the Future Partners website is put together — today, and where it is heading. It is a working draft, kept up to date as decisions are made."},
      {h:"Where we are today"},
-     {p:"Right now the site you are reading is an in-browser prototype: a single HTML page that loads React 18 and Babel from a CDN and compiles the components live in the browser. There is no build step and no server application — every screen, and all the content, is JavaScript loaded as <script type=\"text/babel\">. It is fast to iterate on and perfect for agreeing the design and the information architecture, but it is not the production system."},
+     {p:"Right now the site you are reading is a prototype that runs entirely in your browser. It is fast to change and perfect for agreeing the design and the way things are organised, but it is not the final, live system."},
      {h:"Where we are heading"},
      {list:[
-       "Framework: Next.js (App Router) — server-rendered pages for SEO, with the same component design language carried over.",
-       "Content / CMS: a self-hosted headless CMS. Payload v3 is under evaluation — it runs inside the Next.js app, so there is one codebase to host.",
-       "Hosting: deliberately off-Vercel. Railway or Render, so hosting, database and the CMS sit together with predictable pricing.",
-       "Object storage: S3 or Cloudflare R2 sits behind the Ingestion Inbox — every durable copy of an incoming file lives there, addressed by a permanent key.",
-       "Database: Postgres for content, members, and the inbox/library index.",
+       "A modern website framework (Next.js) so pages load fast and show up well in search.",
+       "A content tool (CMS) you can edit yourself, without needing a developer for everyday changes.",
+       "Hosting with predictable, simple pricing — kept together with the database and content tool.",
+       "Safe file storage sitting behind Incoming, so every copy of a file we save has a permanent home.",
      ]},
      {h:"Why this shape"},
-     {p:"The members area — and the Ingestion Inbox in particular — is the reason for a real backend. Associates send working files from many systems; the portal needs a durable place to keep a permanent copy and a database to track where each item belongs. A static site cannot do that; a self-hosted CMS plus object storage can."},
+     {p:"The members area — and Incoming in particular — is the reason for a real system behind the scenes. Associates send working files from many places; the site needs a safe, lasting home for each one and a way to track where it belongs."},
    ]},
-  {id:"r2", title:"How to edit the website", type:"Web", icon:"file", updated:"Jun 2026", summary:"The content workflow — who edits what, and how a change reaches the live site.",
+  {id:"r2", title:"How to edit the website", type:"Web", icon:"file", updated:"Jun 2026", summary:"Who edits what, and how a change reaches the live site.",
    body:[
-     {p:"Most day-to-day changes — a new case study, a news post, an associate bio, a policy document — are content, not code. Once the production CMS is in place, you edit them yourself without a developer."},
-     {h:"The workflow"},
+     {p:"Most day-to-day changes — a new case study, a news post, an associate bio, a policy document — are content, not code. Once the live content tool is in place, you edit them yourself."},
+     {h:"The everyday workflow"},
      {list:[
-       "Sign in to the CMS (the same login as this members area, with a staff role).",
-       "Find the collection you want — Case studies, News, People, Documents.",
-       "Edit in a structured form: fields for title, summary, body, images, sector and region tags.",
-       "Save as draft and preview. Publish when it reads right; unpublish to pull something down.",
+       "Sign in to the content tool (the same login as this members area).",
+       "Find the section you want — Case studies, News, People, Documents.",
+       "Edit in a simple form: title, summary, body, images, and tags.",
+       "Save as a draft and preview. Publish when it reads right; unpublish to take something down.",
      ]},
-     {h:"Code vs content"},
-     {p:"Layout, design and new page types are code, and go through the developer and a deploy. Everything inside an existing page type is content you control. When in doubt: if it is words or images inside an existing kind of page, it is yours to edit."},
-     {p:"Today, in this prototype, content lives in the data file and is changed by a developer — the CMS workflow above describes the production system."},
+     {h:"When you need a developer"},
+     {p:"Layout, design and brand-new kinds of pages are code, and go through a developer. Everything inside an existing page is yours to edit. A simple rule: if it is words or images inside a kind of page that already exists, it is yours to change."},
    ]},
-  {id:"r3", title:"Deploy & rollback runbook", type:"Web", icon:"clock", updated:"Jun 2026", summary:"How a change goes live, and how to undo one quickly if something breaks.",
+  {id:"r3", title:"Publishing & undo", type:"Web", icon:"clock", updated:"Jun 2026", summary:"How a change goes live, and how to undo one quickly if something looks wrong.",
    body:[
-     {p:"Deploys should be boring. This is the routine for shipping a change and, just as important, for backing one out."},
-     {h:"Deploying"},
+     {p:"Going live should be calm and boring. This is the routine for publishing a change and, just as importantly, for taking one back."},
+     {h:"Publishing a change"},
      {list:[
-       "Changes merge to the main branch in the Git repository.",
-       "The host (Railway / Render) builds the Next.js app automatically and runs a health check.",
-       "If the check passes, the new version goes live; if it fails, the previous version stays up.",
+       "A change is approved and saved.",
+       "The site rebuilds itself automatically and runs a quick check.",
+       "If the check passes, the new version goes live; if it fails, the previous version stays up — so visitors never see a broken site.",
      ]},
-     {h:"Rolling back"},
+     {h:"Undoing a change"},
      {list:[
-       "In the host dashboard, open Deployments and pick the last known-good build.",
-       "Choose Redeploy / Rollback — traffic moves back to it within a minute.",
-       "Content-only mistakes do not need a rollback: unpublish or revert the entry in the CMS.",
+       "A content mistake — wrong words or image — is fixed by editing or unpublishing the entry in the content tool.",
+       "A bigger problem is undone by switching back to the last version that worked, which takes about a minute.",
      ]},
-     {h:"If the site is down"},
-     {p:"Check the host status page first, then the most recent deploy. Nine times out of ten it is the last change — roll back to the previous build, then investigate calmly with the site back up."},
+     {h:"If the site looks down"},
+     {p:"Nine times out of ten it is the most recent change. Switch back to the previous version first to get the site working again, then look into it calmly."},
    ]},
-  {id:"r4", title:"Design system & brand tokens", type:"Web", icon:"heart", updated:"Jun 2026", summary:"The colours, type and spacing that keep every screen on-brand.",
+  {id:"r4", title:"The look & feel (brand)", type:"Web", icon:"heart", updated:"Jun 2026", summary:"The colours, type and spacing that keep every screen on-brand.",
    body:[
-     {p:"The look of the site is defined once, as design tokens, and reused everywhere. Change a token and it updates consistently across the whole site."},
+     {p:"The look of the site is defined once and reused everywhere, so every page feels like part of the same whole. Change it in one place and it updates consistently across the site."},
      {h:"Colour"},
-     {p:"A green scale (green-50 through green-900) carries the brand, with a neutral ink scale for text and quiet paper, surface and mist tones for backgrounds. Components never hard-code a colour — they reference a token, so contrast and consistency hold."},
-     {h:"Type"},
+     {p:"A green palette carries the brand, with calm neutral tones for text and backgrounds. Nothing on the site picks its own colour — everything draws from the shared set, so it always looks consistent."},
+     {h:"Type & spacing"},
      {list:[
-       "Display — for headings, set tight and confident.",
-       "Body — for reading, set generously for long passages.",
-       "Mono — for labels, metadata and small technical detail.",
+       "A confident display font for headings.",
+       "A comfortable font for reading longer passages.",
+       "A neat mono font for small labels and detail.",
      ]},
-     {h:"Spacing, radius & shadow"},
-     {p:"Rounded corners, soft shadows and a consistent spacing rhythm are all tokens too. The koru curve and the Sea · Forest · Crossing photography system complete the visual language. The brand pack — wordmarks, the koru monogram and favicons — lives in the associate library under Brand & collateral."},
+     {p:"Rounded corners, soft shadows and a steady spacing rhythm complete the feel. The brand pack — wordmarks, the koru monogram and favicons — lives in the Library under Brand & collateral."},
    ]},
-  {id:"r5", title:"Notion OS — where everything lives", type:"Web", icon:"external", updated:"Jun 2026", summary:"The operating system for the business sits in Notion; this is the pointer.",
+  {id:"r5", title:"Where everything lives (Notion)", type:"Web", icon:"external", updated:"Jun 2026", summary:"The wider operating system sits in Notion; this is the pointer to it.",
    external:true,
    body:[
-     {p:"The website is one surface of a wider operating system that lives in Notion. This page is the pointer from the site back to that source of truth — it does not duplicate it."},
+     {p:"The website is one part of a wider operating system that lives in Notion. This page is simply the pointer from the site back to that home — it does not copy it."},
      {h:"What lives in Notion"},
      {list:[
        "The content backlog — case studies, news and people, drafted before they reach the site.",
-       "The project and engagement tracker that the working documents here reflect.",
-       "Brand guidelines, decisions and the build log for the site itself.",
-       "Standard operating procedures for how the team works.",
+       "The project and engagement tracker the team documents here reflect.",
+       "Brand guidelines, decisions, and the build log for the site itself.",
+       "How-to notes for the way the team works.",
      ]},
-     {h:"How they relate"},
-     {p:"Notion is where things are decided and drafted; the website and this members area are where the finished, public-or-private versions are published. Keep the thinking in Notion and the polished output here — do not let them drift."},
+     {h:"How they fit together"},
+     {p:"Notion is where things are decided and drafted; the website and this members area are where the finished versions are published. Keep the thinking in Notion and the polished output here."},
    ]},
-  {id:"r6", title:"Redirect map — old Wix site", type:"Web", icon:"link", updated:"Jun 2026", summary:"SEO migration: every old Wix URL maps to its new home so nothing 404s.",
+  {id:"r6", title:"Keeping old links working", type:"Web", icon:"link", updated:"Jun 2026", summary:"Every old web address points to its new home, so nothing breaks.",
    body:[
-     {p:"The previous Future Partners site was built on Wix. When the new site goes live, every meaningful old URL must redirect to its new equivalent with a permanent (301) redirect — so search ranking and any existing links carry over instead of breaking."},
+     {p:"The previous Future Partners site was built on Wix. When the new site goes live, every meaningful old web address points to its new equivalent — so search results and existing links keep working instead of leading nowhere."},
      {h:"How it works"},
      {list:[
-       "A redirect map lists each old path and the new path it points to.",
-       "The Next.js app applies the 301s, so visitors and search engines land on the right page.",
-       "After launch we watch for 404s and add any missed paths to the map.",
+       "A simple map lists each old address and the new address it points to.",
+       "Visitors and search engines are sent straight to the right page.",
+       "After launch we watch for any dead ends and add the missed ones to the map.",
      ]},
-     {h:"Sample mappings (illustrative)"},
+     {h:"A few examples"},
      {list:[
-       "/our-projects  →  /atlas",
-       "/about  →  /#approach",
-       "/team  →  /people",
-       "/contact  →  / (contact opens in-page)",
+       "Old \"our projects\" page → the new Atlas",
+       "Old \"about\" page → the approach section on the home page",
+       "Old \"team\" page → the new People page",
      ]},
-     {p:"The full map is maintained alongside the deploy configuration. This is a draft sample, not the final list."},
+     {p:"The full map is kept alongside the site's settings. This is a draft sample, not the final list."},
    ]},
-  {id:"r7", title:"Domains, DNS & secrets index", type:"Web", icon:"lock", updated:"Jun 2026", summary:"Where the domain, DNS and credentials live — pointers only, never the secrets.",
+  {id:"r7", title:"Domains, logins & where things live", type:"Web", icon:"lock", updated:"Jun 2026", summary:"Where the domain and logins are kept — a list of pointers, never the passwords themselves.",
    body:[
-     {p:"This is a deliberately thin page: an index of where the keys are kept, not the keys themselves. No password, token or private value is ever written here or anywhere in the site."},
-     {h:"Domain & DNS"},
+     {p:"This is a deliberately short page: a list of where the keys are kept, not the keys themselves. No password or private value is ever written here, or anywhere on the site."},
+     {h:"Domain"},
      {list:[
-       "Primary domain: futurepartners.co.nz, with www redirecting to the apex.",
-       "DNS records (A / CNAME / MX / TXT) are managed at the registrar.",
-       "TLS certificates are issued and renewed automatically by the host.",
+       "The website address is futurepartners.co.nz.",
+       "The settings that point the address at the site are managed where the domain was bought.",
+       "The security certificate renews itself automatically.",
      ]},
-     {h:"Where secrets actually live"},
+     {h:"Where the logins actually live"},
      {list:[
-       "Application secrets — database URL, storage keys, CMS secret — live in the host's environment variables, never in the repository.",
-       "Shared credentials are kept in the team password manager.",
-       "The mailbox behind files@futurepartners.co.nz is administered with the other mail accounts.",
+       "Behind-the-scenes settings live with the hosting, never in the website's code.",
+       "Shared logins are kept in the team password manager.",
+       "The mailbox behind the file-forwarding address is looked after with the other email accounts.",
      ]},
-     {p:"If a value is missing or needs rotating, go to the system that owns it (host, registrar, password manager) — this index only tells you which one."},
+     {p:"If a login is missing or needs changing, go to the place that owns it — the hosting, the domain provider, or the password manager. This page only tells you which one."},
    ]},
 ];
 
+/* ---------- a shared document reader (reused by Library + Website guide) ---------- */
+function StfDocBody({body, footLine}){
+  return (
+    <article className="mdoc-doc">
+      {body
+        ? body.map((b,i)=> b.h ? <h3 className="mdoc-doc-h" key={i}>{b.h}</h3>
+            : b.list ? <ul className="mdoc-doc-ul" key={i}>{b.list.map((x,j)=><li key={j}>{x}</li>)}</ul>
+            : <p className="mdoc-doc-p" key={i}>{b.p}</p>)
+        : (
+          <React.Fragment>
+            <p className="mdoc-doc-p">This is a saved copy. The full document opens or downloads from the buttons above — the preview here is a placeholder.</p>
+            <ul className="mdoc-doc-ul">
+              <li>Every file in the Library has a permanent copy saved here.</li>
+              <li>Nothing relies on a link that might expire.</li>
+            </ul>
+          </React.Fragment>
+        )}
+      <p className="mdoc-doc-foot">{footLine}</p>
+    </article>
+  );
+}
+
+/* =====================================================================
+   ROOT — StaffSpace. Filed items are lifted here so Incoming and Library
+   share one list: filing a file in Incoming makes it appear in the Library.
+   ===================================================================== */
 function StaffSpace({signOut, switcher}){
-  const [section, setSection] = useState("inbox"); // inbox | working | runbook | team
+  const [section, setSection] = useState("incoming"); // incoming | library | contacts | guide
+  const [inbox, setInbox]     = useState(STF_INBOX);
+  const [filed, setFiled]     = useState([]); // items filed this session → join the Library
+  const [search, setSearch]   = useState("");
+
+  /* file a freshly-arrived item: mark it filed in the inbox, add a Library record */
+  const fileItem = (item, choice)=>{
+    setInbox(prev=>prev.map(i=> i.id===item.id ? {...i, status:"filed", filedAs:choice} : i));
+    setFiled(prev=>[{
+      id:"F-"+item.id,
+      name:item.name,
+      type:item.type,
+      collection:choice.collection,
+      audience:choice.audience,
+      owner:choice.owner,
+      updated:"Just now",
+      size:item.size,
+      source:item.source,
+      from:item.from,
+      fresh:true,
+    }, ...prev]);
+  };
+
+  const library = [...filed, ...STF_LIBRARY_SEED];
+  const needsCount = inbox.filter(i=>i.status==="needs").length;
+
+  const NAV = [
+    {id:"incoming", icon:"download", label:"Incoming", count:needsCount},
+    {id:"library",  icon:"folder",   label:"Library",  count:library.length},
+    {id:"contacts", icon:"users",    label:"Contacts", count:STF_CONTACTS.length},
+    {id:"guide",    icon:"book",     label:"Website guide"},
+  ];
+
+  /* a tiny global search across the library, scoped to staff content */
+  const searchHits = search.trim()
+    ? library.filter(d=>(d.name+" "+d.collection+" "+(d.owner||"")).toLowerCase().includes(search.trim().toLowerCase()))
+    : null;
 
   return (
     <div className="mem">
@@ -208,18 +475,12 @@ function StaffSpace({signOut, switcher}){
         <span className="mem-side-label">Staff workspace</span>
         {switcher && <SpaceSwitcher {...switcher}/>}
         <nav className="mem-nav">
-          <button className={"mem-navitem"+(section==="inbox"?" on":"")} onClick={()=>setSection("inbox")}>
-            <Icon name="download" size={18}/> Ingestion Inbox <span className="mem-navcount">{STF_INBOX.filter(i=>i.status==="needs").length}</span>
-          </button>
-          <button className={"mem-navitem"+(section==="working"?" on":"")} onClick={()=>setSection("working")}>
-            <Icon name="file" size={18}/> Working documents
-          </button>
-          <button className={"mem-navitem"+(section==="runbook"?" on":"")} onClick={()=>setSection("runbook")}>
-            <Icon name="book" size={18}/> Website runbook
-          </button>
-          <button className={"mem-navitem"+(section==="team"?" on":"")} onClick={()=>setSection("team")}>
-            <Icon name="users" size={18}/> Team <span className="mem-navcount">{PEOPLE.length}</span>
-          </button>
+          {NAV.map(n=>(
+            <button key={n.id} className={"mem-navitem"+(section===n.id?" on":"")} onClick={()=>{setSection(n.id); setSearch("");}}>
+              <Icon name={n.icon} size={18}/> {n.label}
+              {n.count!=null && <span className="mem-navcount">{n.count}</span>}
+            </button>
+          ))}
         </nav>
         <div className="mem-side-foot">
           <div className="mem-user">
@@ -234,7 +495,7 @@ function StaffSpace({signOut, switcher}){
         <header className="mem-top">
           <label className="mem-search">
             <Icon name="search" size={18}/>
-            <input placeholder="Search the back-office…"/>
+            <input value={search} onChange={e=>{setSearch(e.target.value); if(e.target.value.trim()) setSection("library");}} placeholder="Search the Library…"/>
           </label>
           <div className="mem-top-actions">
             <span className="mem-draftpill">DRAFT · concept</span>
@@ -244,10 +505,14 @@ function StaffSpace({signOut, switcher}){
 
         <div className="mem-content">
           {typeof ConceptIntro !== "undefined" && <ConceptIntro space="staff"/>}
-          {section==="inbox"   && <StfInbox/>}
-          {section==="working" && <StfWorking/>}
-          {section==="runbook" && <StfRunbook/>}
-          {section==="team"    && <StfTeam/>}
+          {searchHits
+            ? <StfLibrary docs={library} externalHits={searchHits} searchTerm={search} onClearSearch={()=>setSearch("")}/>
+            : <React.Fragment>
+                {section==="incoming" && <StfIncoming inbox={inbox} onFile={fileItem}/>}
+                {section==="library"  && <StfLibrary docs={library}/>}
+                {section==="contacts" && <StfContacts/>}
+                {section==="guide"    && <StfGuide/>}
+              </React.Fragment>}
         </div>
       </div>
     </div>
@@ -258,7 +523,7 @@ function StaffSpace({signOut, switcher}){
 function StfSourceChip({source}){
   const s = STF_SOURCES[source] || STF_SOURCES.upload;
   return (
-    <span className="stf-source" style={{"--src":s.color, color:s.color, background:s.color+"14", borderColor:s.color+"33"}}>
+    <span className="stf-source" style={{color:s.color, background:s.color+"14", borderColor:s.color+"33"}}>
       <Icon name={s.icon} size={13}/> {s.label}
     </span>
   );
@@ -267,33 +532,33 @@ function StfFromAvatar({person}){
   if(!person) return null;
   return <span className={"stf-av "+(person.fill||"fill-forest")} title={person.name}>{person.initials}</span>;
 }
+/* who-can-see-it badge — maps to the existing visibility chip styles */
+function StfWhoBadge({audience}){
+  const cls = audience==="public" ? "vis-public" : audience==="staff" ? "vis-archived" : "vis-membersOnly";
+  return <span className={"vis "+cls}>{audLabel(audience)}</span>;
+}
 
 /* =====================================================================
-   1 · INGESTION INBOX — the showpiece
+   1 · INCOMING — the showpiece. Files arrive from anywhere, we save a copy
+   the moment they land, and a quick "File it" step puts each one in the Library.
    ===================================================================== */
-function StfInbox(){
-  const [items, setItems] = useState(STF_INBOX);
-  const [filing, setFiling] = useState(null); // the item being triaged
+function StfIncoming({inbox, onFile}){
+  const [filing, setFiling] = useState(null); // the item being filed
 
-  const needs  = items.filter(i=>i.status==="needs");
+  const needs    = inbox.filter(i=>i.status==="needs");
   const expiring = needs.filter(i=>i.expiresIn!=null);
-  const filedThisWeek = 14; // rolling count (mock)
-
-  const onFiled = (id, payload)=>{
-    setItems(prev=>prev.map(i=> i.id===id ? {...i, status:"filed", filedAs:payload} : i));
-    setFiling(null);
-  };
+  const filedThisWeek = 14 + inbox.filter(i=>i.status==="filed").length; // rolling count (mock)
 
   return (
     <div className="stf-inbox">
       <div className="mhome-head">
-        <p className="eyebrow">Ingestion inbox</p>
-        <h1 className="mhome-h1">One home. Many on-ramps.</h1>
-        <p className="mhome-lead fp-lead">Associates send working files from wherever they are — Dropbox, Drive, WeTransfer, a plain email. Everything lands here, we keep a permanent copy on arrival, and a quick triage files each item into the library. No more rotting links.</p>
+        <p className="eyebrow">Incoming</p>
+        <h1 className="mhome-h1">One place for every file — however it arrives.</h1>
+        <p className="mhome-lead fp-lead">Associates send working files from wherever they are — Dropbox, Drive, WeTransfer, a plain email. Everything lands here, we save a copy the moment it arrives, and a quick step files each one into the Library. No more links that stop working.</p>
       </div>
 
-      {/* ON-RAMPS */}
-      <span className="mem-sec-h">Ways in</span>
+      {/* WAYS IN */}
+      <span className="mem-sec-h">Add files</span>
       <div className="stf-onramps">
         {STF_ONRAMPS.map(r=>(
           <div className={"stf-onramp"+(r.id==="upload"?" stf-onramp-drop":"")} key={r.id}>
@@ -308,21 +573,21 @@ function StfInbox(){
         ))}
       </div>
 
-      {/* PIPELINE EXPLAINER — the architecture, made legible */}
+      {/* THE FLOW — said like a person would */}
       <div className="stf-flow">
         <div className="stf-flow-step">
           <span className="stf-flow-ic"><Icon name="layers" size={18}/></span>
-          <div><span className="stf-flow-t">Many sources</span><span className="stf-flow-s">Dropbox · Drive · WeTransfer · Email</span></div>
+          <div><span className="stf-flow-t">Arrives from anywhere</span><span className="stf-flow-s">Dropbox · Drive · WeTransfer · Email</span></div>
         </div>
         <span className="stf-flow-arrow"><Icon name="arrow" size={18}/></span>
         <div className="stf-flow-step">
           <span className="stf-flow-ic"><Icon name="download" size={18}/></span>
-          <div><span className="stf-flow-t">One durable copy</span><span className="stf-flow-s">Captured to storage on arrival</span></div>
+          <div><span className="stf-flow-t">Saved safely here</span><span className="stf-flow-s">A copy is kept the moment it arrives</span></div>
         </div>
         <span className="stf-flow-arrow"><Icon name="arrow" size={18}/></span>
         <div className="stf-flow-step">
           <span className="stf-flow-ic"><Icon name="check" size={18}/></span>
-          <div><span className="stf-flow-t">Filed in the library</span><span className="stf-flow-s">Collection · audience · version</span></div>
+          <div><span className="stf-flow-t">Filed where you'll find it</span><span className="stf-flow-s">Into a Library collection</span></div>
         </div>
       </div>
 
@@ -330,11 +595,11 @@ function StfInbox(){
       <div className="stf-stats">
         <div className="stf-stat">
           <span className="stf-stat-n">{needs.length}</span>
-          <span className="stf-stat-l">Awaiting filing</span>
+          <span className="stf-stat-l">Waiting to be filed</span>
         </div>
         <div className="stf-stat stf-stat-warn">
           <span className="stf-stat-n">{expiring.length}</span>
-          <span className="stf-stat-l">From WeTransfer · expiring</span>
+          <span className="stf-stat-l">From WeTransfer · link expiring</span>
         </div>
         <div className="stf-stat">
           <span className="stf-stat-n">{filedThisWeek}</span>
@@ -343,12 +608,12 @@ function StfInbox(){
       </div>
 
       {/* THE LIST */}
-      <span className="mem-sec-h">Incoming</span>
+      <span className="mem-sec-h">Just arrived</span>
       <div className="stf-list">
         <div className="stf-listhead">
-          <span>File</span><span className="stf-col">Source</span><span className="stf-col">From</span><span className="stf-col">Received</span><span className="stf-col">Size</span><span className="stf-col stf-col-act">Status</span>
+          <span>File</span><span className="stf-col">Came from</span><span className="stf-col">Sent by</span><span className="stf-col">Arrived</span><span className="stf-col">Size</span><span className="stf-col stf-col-act">Status</span>
         </div>
-        {items.map(it=>{
+        {inbox.map(it=>{
           const person = personById(it.from);
           const isExpiring = it.expiresIn!=null && it.status==="needs";
           return (
@@ -358,9 +623,9 @@ function StfInbox(){
                 <span className="stf-file-main">
                   <span className="stf-file-name">{it.name}</span>
                   {isExpiring
-                    ? <span className="stf-expire"><Icon name="clock" size={12}/> Link expires in {it.expiresIn} day{it.expiresIn===1?"":"s"} — copy secured here</span>
+                    ? <span className="stf-expire"><Icon name="clock" size={12}/> Link expires in {it.expiresIn} day{it.expiresIn===1?"":"s"} — copy already saved here</span>
                     : it.status==="filed"
-                      ? <span className="stf-filed-as"><Icon name="check" size={12}/> Filed → {it.filedAs.collection} · {(STF_AUDIENCES.find(a=>a.id===it.filedAs.audience)||{}).label} · {it.filedAs.version}</span>
+                      ? <span className="stf-filed-as"><Icon name="check" size={12}/> Filed → {it.filedAs.collection} · {audLabel(it.filedAs.audience)}</span>
                       : <span className="stf-suggest">Suggested: {it.suggest}</span>}
                 </span>
               </span>
@@ -378,17 +643,16 @@ function StfInbox(){
         })}
       </div>
 
-      {filing && <StfFileModal item={filing} onClose={()=>setFiling(null)} onFiled={onFiled}/>}
+      {filing && <StfFileModal item={filing} onClose={()=>setFiling(null)} onFile={(choice)=>{onFile(filing, choice); setFiling(null);}}/>}
     </div>
   );
 }
 
-/* ---------- the triage modal: scattered link → normalised library item ---------- */
-function StfFileModal({item, onClose, onFiled}){
+/* ---------- the "File it" modal: a just-arrived file → a tidy Library item ---------- */
+function StfFileModal({item, onClose, onFile}){
   const person = personById(item.from);
   const [collection, setCollection] = useState(item.suggest || STF_COLLECTIONS[0]);
   const [audience,   setAudience]   = useState("associate");
-  const [version,    setVersion]    = useState("v1.0");
   const [owner,      setOwner]      = useState("Kirsty Burnett");
 
   useEffect(()=>{
@@ -401,26 +665,25 @@ function StfFileModal({item, onClose, onFiled}){
 
   return (
     <div className="stf-modal-scrim" onClick={onClose}>
-      <div className="stf-modal" onClick={(e)=>e.stopPropagation()} role="dialog" aria-label="File incoming item">
+      <div className="stf-modal" onClick={(e)=>e.stopPropagation()} role="dialog" aria-label="File this item">
         <button className="stf-modal-x" onClick={onClose} aria-label="Close"><Icon name="x" size={18}/></button>
-        <span className="mem-panel-h">Triage · file into the library</span>
+        <span className="mem-panel-h">Sort this into the Library</span>
         <h2 className="stf-modal-h">{item.name}</h2>
 
-        {/* before → after: this is the core idea, made visible */}
         <div className="stf-triage">
           <div className="stf-triage-side stf-triage-from">
-            <span className="stf-triage-cap">Arrived as</span>
+            <span className="stf-triage-cap">Where it came from</span>
             <StfSourceChip source={item.source}/>
             <ul className="stf-triage-facts">
-              <li><span>From</span><b>{person ? person.name : item.from}</b></li>
-              <li><span>Received</span><b>{item.received}</b></li>
+              <li><span>Sent by</span><b>{person ? person.name : item.from}</b></li>
+              <li><span>Arrived</span><b>{item.received}</b></li>
               <li><span>Size</span><b>{item.size}</b></li>
-              <li><span>Original link</span><b className={src.ephemeral?"stf-rot":""}>{src.ephemeral?`Expires in ${item.expiresIn} days`:"Stable"}</b></li>
+              <li><span>Original link</span><b className={src.ephemeral?"stf-rot":""}>{src.ephemeral?`Expires in ${item.expiresIn} days`:"Still good"}</b></li>
             </ul>
           </div>
           <span className="stf-triage-arrow"><Icon name="arrow" size={22}/></span>
           <div className="stf-triage-side stf-triage-to">
-            <span className="stf-triage-cap">Becomes a library item</span>
+            <span className="stf-triage-cap">File it as</span>
             <div className="stf-fields">
               <label className="stf-field">
                 <span>Collection</span>
@@ -432,32 +695,26 @@ function StfFileModal({item, onClose, onFiled}){
                 </div>
               </label>
               <label className="stf-field">
-                <span>Audience</span>
+                <span>Who can see it</span>
                 <div className="stf-seg">
                   {STF_AUDIENCES.map(a=>(
                     <button type="button" key={a.id} className={"stf-seg-btn"+(audience===a.id?" on":"")} onClick={()=>setAudience(a.id)}>{a.label}</button>
                   ))}
                 </div>
               </label>
-              <div className="stf-field-row">
-                <label className="stf-field">
-                  <span>Version</span>
-                  <input className="stf-input" value={version} onChange={e=>setVersion(e.target.value)}/>
-                </label>
-                <label className="stf-field">
-                  <span>Owner</span>
-                  <input className="stf-input" value={owner} onChange={e=>setOwner(e.target.value)}/>
-                </label>
-              </div>
+              <label className="stf-field">
+                <span>Owner</span>
+                <input className="stf-input" value={owner} onChange={e=>setOwner(e.target.value)}/>
+              </label>
             </div>
           </div>
         </div>
 
         <div className="stf-modal-foot">
-          <span className="stf-modal-note"><Icon name="shield" size={14}/> A permanent copy is already stored — filing just tells the library where it belongs.</span>
+          <span className="stf-modal-note"><Icon name="shield" size={14}/> We've already saved a copy — filing just tells us where it belongs.</span>
           <div className="stf-modal-actions">
             <Btn kind="secondary" size="sm" onClick={onClose}>Cancel</Btn>
-            <Btn kind="primary" size="sm" arrow onClick={()=>onFiled(item.id, {collection, audience, version, owner})}>File into library</Btn>
+            <Btn kind="primary" size="sm" arrow onClick={()=>onFile({collection, audience, owner})}>File into Library</Btn>
           </div>
         </div>
       </div>
@@ -466,59 +723,518 @@ function StfFileModal({item, onClose, onFiled}){
 }
 
 /* =====================================================================
-   2 · WORKING DOCUMENTS
+   2 · LIBRARY — every filed document, searchable & filterable.
+   Filters: collection · file type · who can see it. Click a row to read it.
+   `externalHits` (optional) wires the top-bar search into the same view.
    ===================================================================== */
-function StfWorking(){
+function StfLibrary({docs, externalHits, searchTerm, onClearSearch}){
+  const [openId, setOpenId]   = useState(null);
+  const [collection, setColl] = useState("All");
+  const [ftype, setFtype]     = useState("All");
+  const [who, setWho]         = useState("All");
+  const [localSearch, setLocalSearch] = useState("");
+
+  const open = openId ? docs.find(d=>d.id===openId) : null;
+  if(open) return <StfLibraryDoc doc={open} onBack={()=>setOpenId(null)}/>;
+
+  const types = ["All", ...Array.from(new Set(docs.map(d=>d.type)))];
+  const usingTopSearch = !!externalHits;
+
+  let results = usingTopSearch ? externalHits : docs;
+  if(!usingTopSearch){
+    if(collection!=="All") results = results.filter(d=>d.collection===collection);
+    if(ftype!=="All")      results = results.filter(d=>d.type===ftype);
+    if(who!=="All")        results = results.filter(d=>d.audience===who);
+    if(localSearch.trim()){
+      const q = localSearch.trim().toLowerCase();
+      results = results.filter(d=>(d.name+" "+d.collection+" "+(d.owner||"")).toLowerCase().includes(q));
+    }
+  }
+
+  const anyFilter = collection!=="All" || ftype!=="All" || who!=="All" || localSearch.trim();
+
   return (
-    <div className="stf-working">
+    <div className="stf-library">
       <div className="mhome-head">
-        <p className="eyebrow">Back-office</p>
-        <h1 className="mhome-h1">Working documents</h1>
-        <p className="mhome-lead fp-lead">The internal records that run the practice — proposals and pipeline, engagement admin, financials, contracts and associate agreements. Staff-only.</p>
+        <p className="eyebrow">Library</p>
+        <h1 className="mhome-h1">Every filed document, easy to find.</h1>
+        <p className="mhome-lead fp-lead">Everything that's been filed lives here — policies, templates, guides, brand files, client work and the team's own records. Search it, or narrow it down by collection, file type, or who can see it.</p>
       </div>
-      {STF_WORKING.map(g=>(
-        <div className="stf-wgroup" key={g.group}>
-          <span className="mem-sec-h"><Icon name={g.icon} size={15}/> {g.group}</span>
+
+      {usingTopSearch ? (
+        <div className="stf-lib-searchnote">
+          <span><Icon name="search" size={15}/> {externalHits.length} result{externalHits.length===1?"":"s"} for “{searchTerm}”</span>
+          <button className="stf-chip" onClick={onClearSearch}>Clear search</button>
+        </div>
+      ) : (
+        <React.Fragment>
+          {/* COLLECTION PILLS */}
+          <div className="stf-pillrow">
+            <button className={"stf-pill"+(collection==="All"?" on":"")} onClick={()=>setColl("All")}>
+              All collections <span className="stf-pill-n">{docs.length}</span>
+            </button>
+            {STF_LIB_COLLECTIONS.map(c=>{
+              const n = docs.filter(d=>d.collection===c.name).length;
+              return (
+                <button key={c.name} className={"stf-pill"+(collection===c.name?" on":"")} onClick={()=>setColl(c.name)}>
+                  <Icon name={c.icon} size={14}/> {c.name} <span className="stf-pill-n">{n}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* SECONDARY FILTERS: search + type + who */}
+          <div className="stf-filterbar">
+            <label className="stf-libsearch">
+              <Icon name="search" size={16}/>
+              <input value={localSearch} onChange={e=>setLocalSearch(e.target.value)} placeholder="Search documents…"/>
+            </label>
+            <div className="stf-selwrap">
+              <Icon name="file" size={14}/>
+              <select value={ftype} onChange={e=>setFtype(e.target.value)}>
+                {types.map(t=><option key={t} value={t}>{t==="All"?"Any file type":t}</option>)}
+              </select>
+              <Icon name="chevronDown" size={14}/>
+            </div>
+            <div className="stf-selwrap">
+              <Icon name="users" size={14}/>
+              <select value={who} onChange={e=>setWho(e.target.value)}>
+                <option value="All">Anyone can see</option>
+                {STF_AUDIENCES.map(a=><option key={a.id} value={a.id}>{a.label}</option>)}
+              </select>
+              <Icon name="chevronDown" size={14}/>
+            </div>
+            {anyFilter && <button className="stf-chip" onClick={()=>{setColl("All");setFtype("All");setWho("All");setLocalSearch("");}}>Reset</button>}
+          </div>
+        </React.Fragment>
+      )}
+
+      {/* RESULTS */}
+      {results.length>0 ? (
+        <div className="stf-list stf-lib-list">
+          <div className="stf-lib-head">
+            <span>Document</span><span className="stf-col">Collection</span><span className="stf-col">Who can see it</span><span className="stf-col">Updated</span><span className="stf-col">Owner</span><span></span>
+          </div>
+          {results.map(d=>{
+            const person = d.from ? personById(d.from) : null;
+            return (
+              <button className="stf-librow" key={d.id} onClick={()=>setOpenId(d.id)}>
+                <span className="stf-file">
+                  <DocIcon type={d.type}/>
+                  <span className="stf-file-main">
+                    <span className="stf-file-name">{d.name}</span>
+                    {d.fresh
+                      ? <span className="stf-filed-as"><Icon name="check" size={12}/> Just filed{person?` · from ${person.name}`:""}</span>
+                      : <span className="stf-lib-sub">{d.size}{d.source?` · saved from ${(STF_SOURCES[d.source]||{}).label}`:""}</span>}
+                  </span>
+                </span>
+                <span className="stf-col stf-meta stf-lib-coll">{d.collection}</span>
+                <span className="stf-col"><StfWhoBadge audience={d.audience}/></span>
+                <span className="stf-col stf-meta">{d.updated}</span>
+                <span className="stf-col stf-meta">{d.owner}</span>
+                <Icon name="chevron" size={16}/>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="atlas-empty stf-empty">
+          <Icon name="search" size={28}/>
+          <h3>Nothing matches those filters.</h3>
+          <p>Try a different collection, file type, or clear the filters to see everything.</p>
+          <Btn kind="secondary" size="sm" onClick={()=>{setColl("All");setFtype("All");setWho("All");setLocalSearch("");}}>Clear filters</Btn>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StfLibraryDoc({doc, onBack}){
+  const person = doc.from ? personById(doc.from) : null;
+  const coll = STF_LIB_COLLECTIONS.find(c=>c.name===doc.collection);
+  const related = STF_LIBRARY_SEED.filter(d=>d.collection===doc.collection && d.id!==doc.id).slice(0,4);
+  return (
+    <div className="mdoc">
+      <button className="mdoc-back" onClick={onBack}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Library</button>
+      <div className="mdoc-detail">
+        <div className="mdoc-reader">
+          <div className="mdoc-doc-head">
+            <DocIcon type={doc.type}/>
+            <StfWhoBadge audience={doc.audience}/>
+          </div>
+          <h1 className="mdoc-h1">{doc.name}</h1>
+          <p className="mdoc-lead">Filed under {doc.collection}. {person?`Sent by ${person.name}, `:""}owned by {doc.owner}.</p>
+          <div className="mdoc-actions">
+            <Btn kind="primary" size="sm"><Icon name="download" size={16}/> Download {doc.type}</Btn>
+            <Btn kind="secondary" size="sm">Open in browser</Btn>
+          </div>
+          <div className="mdoc-preview">
+            <StfDocBody body={doc.body} footLine={`Future Partners · Library · ${doc.name} · Updated ${doc.updated}`}/>
+          </div>
+        </div>
+        <aside className="mdoc-meta">
+          <div className="mem-panel">
+            <span className="mem-panel-h">Document details</span>
+            <dl className="mem-facts">
+              <div><dt>Type</dt><dd>{doc.type}</dd></div>
+              <div><dt>Collection</dt><dd>{doc.collection}</dd></div>
+              <div><dt>Who can see it</dt><dd>{audLabel(doc.audience)}</dd></div>
+              <div><dt>Owner</dt><dd>{doc.owner}</dd></div>
+              <div><dt>Updated</dt><dd>{doc.updated}</dd></div>
+              {doc.size && <div><dt>Size</dt><dd>{doc.size}</dd></div>}
+              {doc.source && <div><dt>Came from</dt><dd>{(STF_SOURCES[doc.source]||{}).label}</dd></div>}
+            </dl>
+          </div>
+          {related.length>0 && (
+            <div className="mem-panel">
+              <span className="mem-panel-h">More in {coll?coll.name:doc.collection}</span>
+              <div className="mdoc-related">
+                {related.map(r=>(
+                  <button className="mdoc-relrow" key={r.id} onClick={()=>{}} disabled>
+                    <DocIcon type={r.type}/>
+                    <span className="mdoc-relrow-title">{r.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+/* =====================================================================
+   3 · CONTACts — a light address book with relationship history.
+   People · Organisations. Filter people by type & status; open a person
+   to see their details, projects, files and a history of contact.
+   ===================================================================== */
+function StfContacts(){
+  const [tab, setTab]       = useState("people"); // people | orgs
+  const [openPerson, setOpenPerson] = useState(null);
+  const [openOrg, setOpenOrg]       = useState(null);
+  const [search, setSearch] = useState("");
+  const [type, setType]     = useState("All");
+  const [status, setStatus] = useState("All");
+
+  if(openPerson){
+    const c = STF_CONTACTS.find(x=>x.id===openPerson);
+    return <StfPersonDetail c={c} onBack={()=>setOpenPerson(null)} onOrg={(name)=>{setOpenPerson(null); setOpenOrg(name); setTab("orgs");}}/>;
+  }
+  if(openOrg){
+    const o = orgByName(openOrg);
+    return <StfOrgDetail org={o} onBack={()=>setOpenOrg(null)} onPerson={(id)=>{setOpenOrg(null); setOpenPerson(id); setTab("people");}}/>;
+  }
+
+  /* filtered people */
+  let people = STF_CONTACTS;
+  if(type!=="All")   people = people.filter(c=>c.type===type);
+  if(status!=="All") people = people.filter(c=>c.status===status);
+  if(search.trim()){
+    const q = search.trim().toLowerCase();
+    people = people.filter(c=>(c.name+" "+c.org+" "+c.title+" "+(c.tags||[]).join(" ")).toLowerCase().includes(q));
+  }
+
+  return (
+    <div className="stf-contacts">
+      <div className="stf-team-head">
+        <div className="mhome-head">
+          <p className="eyebrow">Contacts</p>
+          <h1 className="mhome-h1">Everyone Future Partners works with.</h1>
+          <p className="mhome-lead fp-lead">A shared address book for clients, funders, associates, partners and prospects — with each person's details, the projects they're linked to, and a history of when you last spoke.</p>
+        </div>
+        <div className="stf-import">
+          <Btn kind="secondary" size="sm"><Icon name="download" size={16}/> Import from spreadsheet</Btn>
+          <span className="stf-import-note">Seeded from your master contact sheet</span>
+        </div>
+      </div>
+
+      {/* People · Organisations toggle */}
+      <div className="stf-toggle">
+        <button className={"stf-toggle-btn"+(tab==="people"?" on":"")} onClick={()=>setTab("people")}><Icon name="users" size={15}/> People <span className="stf-pill-n">{STF_CONTACTS.length}</span></button>
+        <button className={"stf-toggle-btn"+(tab==="orgs"?" on":"")} onClick={()=>setTab("orgs")}><Icon name="globe" size={15}/> Organisations <span className="stf-pill-n">{STF_ORGS.length}</span></button>
+      </div>
+
+      {tab==="people" ? (
+        <React.Fragment>
+          {/* filters */}
+          <div className="stf-filterbar">
+            <label className="stf-libsearch">
+              <Icon name="search" size={16}/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search people, organisations…"/>
+            </label>
+            <div className="stf-selwrap">
+              <Icon name="users" size={14}/>
+              <select value={type} onChange={e=>setType(e.target.value)}>
+                <option value="All">Any type</option>
+                {STF_CONTACT_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+              </select>
+              <Icon name="chevronDown" size={14}/>
+            </div>
+            <div className="stf-selwrap">
+              <Icon name="compass" size={14}/>
+              <select value={status} onChange={e=>setStatus(e.target.value)}>
+                <option value="All">Any status</option>
+                {STF_CONTACT_STATUS.map(s=><option key={s} value={s}>{s}</option>)}
+              </select>
+              <Icon name="chevronDown" size={14}/>
+            </div>
+            {(type!=="All"||status!=="All"||search.trim()) && <button className="stf-chip" onClick={()=>{setType("All");setStatus("All");setSearch("");}}>Reset</button>}
+          </div>
+
+          {people.length>0 ? (
+            <div className="stf-list stf-people-list">
+              <div className="stf-ppl-head">
+                <span>Name</span><span className="stf-col">Organisation</span><span className="stf-col">Type</span><span className="stf-col">Status</span><span className="stf-col">Last contact</span><span></span>
+              </div>
+              {people.map(c=>(
+                <button className="stf-pplrow" key={c.id} onClick={()=>setOpenPerson(c.id)}>
+                  <span className="stf-ppl-name-cell">
+                    <span className={"stf-av "+(c.fill||"fill-forest")}>{c.initials}</span>
+                    <span className="stf-file-main">
+                      <span className="stf-file-name">{c.name}</span>
+                      <span className="stf-lib-sub">{c.title}</span>
+                    </span>
+                  </span>
+                  <span className="stf-col stf-meta">{c.org}</span>
+                  <span className="stf-col"><span className={"stf-typechip stf-type-"+c.type.replace(/[^a-z]+/gi,"").toLowerCase()}>{c.type}</span></span>
+                  <span className="stf-col"><span className={"stf-statuschip"+(c.status==="Active"?" on":c.status==="Prospect"?" prospect":"")}>{c.status}</span></span>
+                  <span className="stf-col stf-meta">{c.lastContact}</span>
+                  <Icon name="chevron" size={16}/>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="atlas-empty stf-empty">
+              <Icon name="users" size={28}/>
+              <h3>No one matches those filters.</h3>
+              <p>Try a different type or status, or clear the filters.</p>
+              <Btn kind="secondary" size="sm" onClick={()=>{setType("All");setStatus("All");setSearch("");}}>Clear filters</Btn>
+            </div>
+          )}
+        </React.Fragment>
+      ) : (
+        <div className="stf-orggrid">
+          {STF_ORGS.filter(o=>o.name!=="Future Partners").map(o=>{
+            const n = contactsForOrg(o.name).length;
+            return (
+              <button className="stf-orgcard" key={o.name} onClick={()=>setOpenOrg(o.name)}>
+                <span className="stf-org-ic"><Icon name="globe" size={20}/></span>
+                <span className="stf-org-body">
+                  <span className="stf-org-name">{o.name}</span>
+                  <span className="stf-org-type">{o.type} · {o.region}</span>
+                </span>
+                <span className="stf-org-foot">
+                  <span className="stf-org-stat">{n} contact{n===1?"":"s"}</span>
+                  <span className="stf-org-stat">{o.cases.length} project{o.cases.length===1?"":"s"}</span>
+                  <Icon name="chevron" size={16}/>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- person detail: details, org, projects, files, history ---------- */
+function StfPersonDetail({c, onBack, onOrg}){
+  if(!c) return null;
+  const projects = (c.cases||[]).map(id=>caseById(id)).filter(Boolean).slice(0,4);
+  /* a couple of plausibly-linked Library files (by collection / sector) */
+  const linkedFiles = STF_LIBRARY_SEED.filter(d=>
+    (c.type==="Associate" && d.collection==="Templates") ||
+    (c.type!=="Associate" && d.collection==="Client deliverables") ||
+    d.collection==="Brand & collateral"
+  ).slice(0,3);
+  const org = orgByName(c.org);
+
+  return (
+    <div className="mdoc">
+      <button className="mdoc-back" onClick={onBack}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Contacts</button>
+
+      <div className="stf-person-hero">
+        <span className={"stf-av xl "+(c.fill||"fill-forest")}>{c.initials}</span>
+        <div className="stf-person-hero-id">
+          <h1 className="stf-person-hero-name">{c.name}</h1>
+          <p className="stf-person-hero-role">{c.title}{c.org?` · ${c.org}`:""}</p>
+          <div className="stf-person-hero-chips">
+            <span className={"stf-typechip stf-type-"+c.type.replace(/[^a-z]+/gi,"").toLowerCase()}>{c.type}</span>
+            <span className={"stf-statuschip"+(c.status==="Active"?" on":c.status==="Prospect"?" prospect":"")}>{c.status}</span>
+            {(c.tags||[]).map(t=><span className="stf-tag" key={t}>{t}</span>)}
+          </div>
+        </div>
+        <div className="stf-person-hero-actions">
+          <a href={"mailto:"+c.email} className="stf-contact-btn"><Icon name="mail" size={15}/> Email</a>
+          <a href={"tel:"+c.phone.replace(/\s/g,"")} className="stf-contact-btn ghost"><Icon name="phone" size={15}/> Call</a>
+        </div>
+      </div>
+
+      <div className="mdoc-detail">
+        <div className="mdoc-reader">
+          {/* history of contact */}
+          <span className="mem-sec-h">History of contact</span>
+          <div className="stf-timeline">
+            {(c.history||[]).map((h,i)=>(
+              <div className="stf-tl-item" key={i}>
+                <span className="stf-tl-dot"></span>
+                <div className="stf-tl-body">
+                  <span className="stf-tl-t">{h.t}</span>
+                  <span className="stf-tl-d">{h.d}</span>
+                </div>
+              </div>
+            ))}
+            <button className="stf-tl-log"><Icon name="mail" size={14}/> Log contact</button>
+          </div>
+
+          {/* linked projects */}
+          {projects.length>0 && (
+            <React.Fragment>
+              <span className="mem-sec-h">Linked projects</span>
+              <div className="stf-list">
+                {projects.map(p=>(
+                  <div className="stf-wrow stf-projrow" key={p.id}>
+                    <span className="stf-proj-stage">{(STAGE[p.stage]||{}).name||p.stage}</span>
+                    <span className="stf-file-main">
+                      <span className="stf-file-name">{p.title}</span>
+                      <span className="stf-lib-sub">{p.client} · {p.country?p.country.name:""} · {p.year}</span>
+                    </span>
+                    <span className="stf-col stf-meta stf-projrow-region">{p.region}</span>
+                  </div>
+                ))}
+              </div>
+            </React.Fragment>
+          )}
+
+          {/* linked files */}
+          <span className="mem-sec-h">Linked files</span>
           <div className="stf-list">
-            {g.docs.map(d=>(
+            {linkedFiles.map(d=>(
               <div className="stf-wrow" key={d.id}>
                 <DocIcon type={d.type}/>
                 <span className="stf-file-main">
-                  <span className="stf-file-name">{d.title}</span>
-                  <span className="stf-meta stf-wmeta">{d.owner} · updated {d.updated}</span>
+                  <span className="stf-file-name">{d.name}</span>
+                  <span className="stf-lib-sub">{d.collection} · {audLabel(d.audience)}</span>
                 </span>
-                <span className="stf-col stf-meta stf-wver">{d.version}</span>
-                <span className={"vis vis-"+(d.lifecycle==="archived"?"archived":d.lifecycle==="draft"?"draft":"membersOnly")}>
-                  {d.lifecycle==="archived"?"Archived":d.lifecycle==="draft"?"Draft":"Staff"}
-                </span>
-                <button className="stf-wopen" aria-label="Open"><Icon name="external" size={15}/></button>
+                <span className="stf-col stf-meta">{d.updated}</span>
               </div>
             ))}
           </div>
         </div>
-      ))}
+
+        <aside className="mdoc-meta">
+          <div className="mem-panel">
+            <span className="mem-panel-h">Contact details</span>
+            <dl className="mem-facts">
+              <div><dt>Email</dt><dd><a href={"mailto:"+c.email} className="stf-link">{c.email}</a></dd></div>
+              <div><dt>Phone</dt><dd><a href={"tel:"+c.phone.replace(/\s/g,"")} className="stf-link">{c.phone}</a></dd></div>
+              <div><dt>Organisation</dt><dd>{org && org.name!=="Future Partners" ? <button className="stf-link stf-linkbtn" onClick={()=>onOrg(c.org)}>{c.org}</button> : c.org}</dd></div>
+              <div><dt>Type</dt><dd>{c.type}</dd></div>
+              <div><dt>Status</dt><dd>{c.status}</dd></div>
+              <div><dt>Location</dt><dd>{c.location}</dd></div>
+              <div><dt>Last contact</dt><dd>{c.lastContact}</dd></div>
+            </dl>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- organisation detail: its people + its projects ---------- */
+function StfOrgDetail({org, onBack, onPerson}){
+  if(!org) return null;
+  const people   = contactsForOrg(org.name);
+  const projects = (org.cases||[]).map(id=>caseById(id)).filter(Boolean);
+
+  return (
+    <div className="mdoc">
+      <button className="mdoc-back" onClick={onBack}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Contacts</button>
+
+      <div className="stf-person-hero">
+        <span className="stf-org-ic lg"><Icon name="globe" size={26}/></span>
+        <div className="stf-person-hero-id">
+          <h1 className="stf-person-hero-name">{org.name}</h1>
+          <p className="stf-person-hero-role">{org.type} · {org.region}</p>
+          <div className="stf-person-hero-chips">
+            <span className="stf-tag">{people.length} contact{people.length===1?"":"s"}</span>
+            <span className="stf-tag">{projects.length} project{projects.length===1?"":"s"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mdoc-detail">
+        <div className="mdoc-reader">
+          <span className="mem-sec-h">People here</span>
+          {people.length>0 ? (
+            <div className="stf-list">
+              {people.map(c=>(
+                <button className="stf-wrow stf-orgppl" key={c.id} onClick={()=>onPerson(c.id)}>
+                  <span className={"stf-av "+(c.fill||"fill-forest")}>{c.initials}</span>
+                  <span className="stf-file-main">
+                    <span className="stf-file-name">{c.name}</span>
+                    <span className="stf-lib-sub">{c.title}</span>
+                  </span>
+                  <span className="stf-col stf-meta">{c.lastContact}</span>
+                  <Icon name="chevron" size={15}/>
+                </button>
+              ))}
+            </div>
+          ) : <p className="stf-empty-inline">No contacts recorded here yet.</p>}
+
+          {projects.length>0 && (
+            <React.Fragment>
+              <span className="mem-sec-h">Projects with {org.name}</span>
+              <div className="stf-list">
+                {projects.map(p=>(
+                  <div className="stf-wrow stf-projrow" key={p.id}>
+                    <span className="stf-proj-stage">{(STAGE[p.stage]||{}).name||p.stage}</span>
+                    <span className="stf-file-main">
+                      <span className="stf-file-name">{p.title}</span>
+                      <span className="stf-lib-sub">{p.country?p.country.name:""} · {p.year}</span>
+                    </span>
+                    <span className="stf-col stf-meta stf-projrow-region">{p.region}</span>
+                  </div>
+                ))}
+              </div>
+            </React.Fragment>
+          )}
+        </div>
+
+        <aside className="mdoc-meta">
+          <div className="mem-panel">
+            <span className="mem-panel-h">Organisation</span>
+            <dl className="mem-facts">
+              <div><dt>Type</dt><dd>{org.type}</dd></div>
+              <div><dt>Region</dt><dd>{org.region}</dd></div>
+              <div><dt>Contacts</dt><dd>{people.length}</dd></div>
+              <div><dt>Projects</dt><dd>{projects.length}</dd></div>
+            </dl>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
 
 /* =====================================================================
-   3 · WEBSITE RUNBOOK — list of doc cards → reader body
+   4 · WEBSITE GUIDE — doc cards → reader body (reuses .mdoc-doc)
    ===================================================================== */
-function StfRunbook(){
+function StfGuide(){
   const [openId, setOpenId] = useState(null);
-  const doc = openId ? STF_RUNBOOK.find(r=>r.id===openId) : null;
-
-  if(doc) return <StfRunbookDoc doc={doc} onBack={()=>setOpenId(null)}/>;
+  const doc = openId ? STF_GUIDE.find(r=>r.id===openId) : null;
+  if(doc) return <StfGuideDoc doc={doc} onBack={()=>setOpenId(null)}/>;
 
   return (
-    <div className="stf-runbook">
+    <div className="stf-guide">
       <div className="mhome-head">
-        <p className="eyebrow">Manual</p>
-        <h1 className="mhome-h1">Website runbook</h1>
-        <p className="mhome-lead fp-lead">How this website actually works — the stack, how to edit it, how to deploy and roll back, the brand system, and where the keys are kept. A living draft for Kirsty and the team.</p>
+        <p className="eyebrow">Guide</p>
+        <h1 className="mhome-h1">Website guide</h1>
+        <p className="mhome-lead fp-lead">How this website actually works, in plain words — what it's built on, how to edit it, how to publish a change and undo one, the look and feel, and where the logins are kept. A living draft for Kirsty and the team.</p>
       </div>
       <div className="stf-rb-grid">
-        {STF_RUNBOOK.map(r=>(
+        {STF_GUIDE.map(r=>(
           <button className="stf-rb-card" key={r.id} onClick={()=>setOpenId(r.id)}>
             <span className="stf-rb-ic"><Icon name={r.icon} size={20}/></span>
             <span className="stf-rb-body">
@@ -537,10 +1253,10 @@ function StfRunbook(){
   );
 }
 
-function StfRunbookDoc({doc, onBack}){
+function StfGuideDoc({doc, onBack}){
   return (
     <div className="mdoc">
-      <button className="mdoc-back" onClick={onBack}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Website runbook</button>
+      <button className="mdoc-back" onClick={onBack}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Website guide</button>
       <div className="mdoc-detail">
         <div className="mdoc-reader">
           <div className="mdoc-doc-head">
@@ -550,19 +1266,14 @@ function StfRunbookDoc({doc, onBack}){
           <h1 className="mdoc-h1">{doc.title}</h1>
           <p className="mdoc-lead">{doc.summary}</p>
           <div className="mdoc-preview">
-            <article className="mdoc-doc">
-              {doc.body.map((b,i)=> b.h ? <h3 className="mdoc-doc-h" key={i}>{b.h}</h3>
-                : b.list ? <ul className="mdoc-doc-ul" key={i}>{b.list.map((x,j)=><li key={j}>{x}</li>)}</ul>
-                : <p className="mdoc-doc-p" key={i}>{b.p}</p>)}
-              <p className="mdoc-doc-foot">Future Partners · Website runbook · {doc.title} · Updated {doc.updated} · DRAFT</p>
-            </article>
+            <StfDocBody body={doc.body} footLine={`Future Partners · Website guide · ${doc.title} · Updated ${doc.updated} · DRAFT`}/>
           </div>
         </div>
         <aside className="mdoc-meta">
           <div className="mem-panel">
-            <span className="mem-panel-h">In this runbook</span>
+            <span className="mem-panel-h">In this guide</span>
             <div className="mdoc-related">
-              {STF_RUNBOOK.map(r=>(
+              {STF_GUIDE.map(r=>(
                 <button className={"mdoc-relrow"+(r.id===doc.id?" stf-rel-on":"")} key={r.id} onClick={()=>{}} disabled>
                   <Icon name={r.icon} size={14}/>
                   <span className="mdoc-relrow-title">{r.title}</span>
@@ -573,52 +1284,6 @@ function StfRunbookDoc({doc, onBack}){
           </div>
         </aside>
       </div>
-    </div>
-  );
-}
-
-/* =====================================================================
-   4 · TEAM — the associate roster from PEOPLE
-   ===================================================================== */
-function StfTeam(){
-  const lead = PEOPLE.filter(p=>p.lead);
-  const associates = PEOPLE.filter(p=>!p.lead);
-  return (
-    <div className="stf-team">
-      <div className="stf-team-head">
-        <div className="mhome-head">
-          <p className="eyebrow">People</p>
-          <h1 className="mhome-h1">Team</h1>
-          <p className="mhome-lead fp-lead">The delivery network — Kirsty and {associates.length} associates. Roles and current status at a glance.</p>
-        </div>
-        <Btn kind="secondary" size="sm"><Icon name="users" size={16}/> Onboard associate</Btn>
-      </div>
-
-      <span className="mem-sec-h">Director</span>
-      <div className="stf-team-grid">
-        {lead.map(p=><StfPersonCard key={p.id} p={p} active/>)}
-      </div>
-
-      <span className="mem-sec-h">Associates</span>
-      <div className="stf-team-grid">
-        {associates.map((p,idx)=><StfPersonCard key={p.id} p={p} active={idx%5!==4}/>)}
-      </div>
-    </div>
-  );
-}
-
-function StfPersonCard({p, active}){
-  return (
-    <div className="stf-person">
-      <span className={"stf-av lg "+(p.fill||"fill-forest")}>{p.initials}</span>
-      <span className="stf-person-info">
-        <span className="stf-person-name">{p.name}</span>
-        <span className="stf-person-role">{p.role}</span>
-        <span className="stf-person-regions">{(p.regions||[]).slice(0,2).join(" · ")}</span>
-      </span>
-      <span className={"stf-status"+(active?" on":"")}>
-        <span className="stf-status-dot"></span>{active?"Active":"On a break"}
-      </span>
     </div>
   );
 }

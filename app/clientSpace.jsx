@@ -382,9 +382,12 @@ function DeliverablesSection({ onOpen }) {
             const isReview = d.status === "review";
             return (
               <div className="cli-deliv-wrap" key={d.id}>
-                <button
+                <div
                   className="mdoc-row cli-deliv-row"
                   onClick={() => !isReview && onOpen(d.id)}
+                  role={isReview ? undefined : "button"}
+                  tabIndex={isReview ? undefined : 0}
+                  onKeyDown={isReview ? undefined : (e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(d.id); } })}
                   style={isReview ? { cursor: "default" } : {}}
                 >
                   <DocIcon type={d.type}/>
@@ -417,7 +420,7 @@ function DeliverablesSection({ onOpen }) {
                     )
                   )}
                   {!isReview && <Icon name="chevron" size={16}/>}
-                </button>
+                </div>
                 {isReview && act.commenting && (
                   <form
                     className="cli-comment-box"
