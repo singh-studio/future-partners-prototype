@@ -71,15 +71,114 @@ const MDOCS = [
 const typeColor = {PDF:"#C0392B",DOCX:"#2A6FDB",XLSX:"#1F8A5B",PPTX:"#D9742B",ZIP:"#6B5BD2",Web:"#157F69",INDD:"#C2387A"};
 const visLabel = {membersOnly:"Members only", public:"Public", archived:"Archived", draft:"Draft"};
 
+/* =====================================================================
+   THE GATE — one locked login, three role-aware spaces.
+   Sign-in issues a role (client | associate | staff); the role decides
+   which space renders. Staff see everything and can switch between spaces.
+   Client + Staff spaces live in clientSpace.jsx / staffSpace.jsx and are
+   rendered here once loaded (a placeholder shows until they are).
+   ===================================================================== */
+function hasFn(n){ return typeof window[n]==="function"; }
+
 function Members({onContact}){
   const [authed, setAuthed] = useState(()=>localStorage.getItem("fp_member")==="1");
-  const [screen, setScreen] = useState({view:"library"}); // library | category | doc
-  const [search, setSearch] = useState("");
+  const [role,   setRole]   = useState(()=>localStorage.getItem("fp_role")||"associate");
+  const [space,  setSpace]  = useState("staff"); // staff-only view switch: "staff" | "associate" | "client"
 
-  const signIn = ()=>{ localStorage.setItem("fp_member","1"); setAuthed(true); setScreen({view:"library"}); };
-  const signOut = ()=>{ localStorage.removeItem("fp_member"); setAuthed(false); };
+  const signIn  = (r)=>{ localStorage.setItem("fp_member","1"); localStorage.setItem("fp_role",r); setRole(r); setSpace("staff"); setAuthed(true); };
+  const signOut = ()=>{ localStorage.removeItem("fp_member"); localStorage.removeItem("fp_role"); setAuthed(false); };
 
   if(!authed) return <MembersLogin onSignIn={signIn}/>;
+
+  const switcher = role==="staff" ? {
+    current: space, onSwitch: setSpace,
+    options:[
+      {id:"staff",     label:"Staff workspace",   icon:"shield"},
+      {id:"associate", label:"Associate library", icon:"book"},
+      {id:"client",    label:"Client view",       icon:"users"},
+    ],
+  } : null;
+
+  if(role==="client")
+    return hasFn("ClientSpace") ? <ClientSpace signOut={signOut}/> : <SpacePlaceholder label="Client workspace" onSignOut={signOut}/>;
+
+  if(role==="staff"){
+    if(space==="associate") return <AssociateSpace signOut={signOut} switcher={switcher}/>;
+    if(space==="client")
+      return hasFn("ClientSpace") ? <ClientSpace staffView signOut={signOut} switcher={switcher}/> : <SpacePlaceholder label="Client workspace" onSignOut={signOut} switcher={switcher}/>;
+    return hasFn("StaffSpace") ? <StaffSpace signOut={signOut} switcher={switcher}/> : <SpacePlaceholder label="Staff workspace" onSignOut={signOut} switcher={switcher}/>;
+  }
+
+  return <AssociateSpace signOut={signOut}/>;
+}
+
+/* Sidebar control: staff switch between spaces (rendered inside each space's mem-side) */
+function SpaceSwitcher({current,onSwitch,options}){
+  return (
+    <div className="mem-switcher">
+      <span className="mem-switcher-h">Viewing as</span>
+      {options.map(o=>(
+        <button key={o.id} className={"mem-switcher-btn"+(current===o.id?" on":"")} onClick={()=>onSwitch(o.id)}>
+          <Icon name={o.icon} size={15}/> {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* Shown for a space whose component file hasn't loaded yet (build-in-progress safe) */
+function SpacePlaceholder({label,onSignOut,switcher}){
+  return (
+    <div className="mem">
+      <aside className="mem-side">
+        <a href="#/" className="mem-logo" onClick={(e)=>{e.preventDefault(); navigate("/");}}><img src="assets/logo.png" alt="Future Partners"/></a>
+        <span className="mem-side-label">{label}</span>
+        {switcher && <SpaceSwitcher {...switcher}/>}
+        <nav className="mem-nav" style={{flex:1}}/>
+        <div className="mem-side-foot">
+          <button className="mem-signout" onClick={onSignOut}><Icon name="lock" size={15}/> Sign out</button>
+        </div>
+      </aside>
+      <div className="mem-main">
+        <div className="mem-content">
+          <div className="mhome-head"><p className="eyebrow">Coming up</p><h1 className="mhome-h1">{label}</h1>
+          <p className="mhome-lead fp-lead">This space is being built.</p></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Dismissible "you're previewing a concept" note — shown at the top of each
+   space so a reviewer (Kirsty) knows what they're looking at. Remembers dismissal. */
+const INTRO_COPY = {
+  client:    {h:"You're previewing the client workspace", p:"A concept of what a Future Partners client sees — their engagement, deliverables to review, shared files and the team on it. Draft, with example content."},
+  associate: {h:"You're previewing the associate library", p:"A concept of the operating library — policies, templates, guides and brand collateral for the delivery network. Draft, with example content."},
+  staff:     {h:"You're previewing the staff workspace", p:"A concept of the back-office — the Ingestion Inbox for files from anywhere, working documents and the website runbook. Draft, with example content."},
+};
+function ConceptIntro({space}){
+  const key = "fp_intro_"+space;
+  const [show, setShow] = useState(()=>localStorage.getItem(key)!=="0");
+  if(!show) return null;
+  const c = INTRO_COPY[space] || INTRO_COPY.client;
+  return (
+    <div className="mem-intro">
+      <span className="mem-intro-icon"><Icon name="compass" size={18}/></span>
+      <div className="mem-intro-text"><strong>{c.h}</strong><span>{c.p}</span></div>
+      <button className="mem-intro-x" onClick={()=>{localStorage.setItem(key,"0"); setShow(false);}} aria-label="Dismiss">
+        <Icon name="x" size={16}/>
+      </button>
+    </div>
+  );
+}
+
+/* =====================================================================
+   ASSOCIATE SPACE — the existing operating library (unchanged), now one
+   of three spaces behind the gate. Staff can drop into it via the switcher.
+   ===================================================================== */
+function AssociateSpace({signOut, switcher}){
+  const [screen, setScreen] = useState({view:"library"}); // library | category | doc
+  const [search, setSearch] = useState("");
 
   const cat = screen.view==="category" ? MCATS.find(c=>c.id===screen.id) : null;
   const doc = screen.view==="doc" ? MDOCS.find(d=>d.id===screen.id) : null;
@@ -94,6 +193,7 @@ function Members({onContact}){
           <img src="assets/logo.png" alt="Future Partners"/>
         </a>
         <span className="mem-side-label">Operating library</span>
+        {switcher && <SpaceSwitcher {...switcher}/>}
         <nav className="mem-nav">
           <button className={"mem-navitem"+(screen.view==="library"?" on":"")} onClick={()=>{setScreen({view:"library"});setSearch("");}}>
             <Icon name="grid" size={18}/> Library home
@@ -127,6 +227,7 @@ function Members({onContact}){
         </header>
 
         <div className="mem-content">
+          <ConceptIntro space="associate"/>
           {searchHits ? (
             <MemSearch hits={searchHits} q={search} onOpen={(id)=>setScreen({view:"doc",id})} onClear={()=>setSearch("")}/>
           ) : screen.view==="library" ? (
@@ -142,36 +243,51 @@ function Members({onContact}){
   );
 }
 
+const ROLE_OPTS = [
+  {id:"client",    label:"Client",    hint:"A partner organisation working with Future Partners"},
+  {id:"associate", label:"Associate", hint:"An associate in the delivery network"},
+  {id:"staff",     label:"Staff",     hint:"Kirsty & the core Future Partners team"},
+];
 function MembersLogin({onSignIn}){
+  const [role,setRole] = useState("client");
   return (
     <div className="mlogin">
       <div className="mlogin-brand">
         <Koru className="mlogin-koru" stroke="var(--green-500)" op={0.5}/>
         <a href="#/" className="mlogin-logo" onClick={(e)=>{e.preventDefault(); navigate("/");}}><img src="assets/logo-white.png" alt="Future Partners"/></a>
         <div className="mlogin-pitch">
-          <p className="eyebrow on-dark">Members operating library</p>
-          <h1 className="mlogin-h1">One place for the way we work.</h1>
-          <p className="mlogin-lead">Policies, templates, guides, newsletters, brand collateral and archived case studies — the operating library for Future Partners associates and the wider delivery network.</p>
+          <p className="eyebrow on-dark">Future Partners members area</p>
+          <h1 className="mlogin-h1">One secure place to work together.</h1>
+          <p className="mlogin-lead">A single, private members area for the people Future Partners works with — clients, associates and the team. Sign in to see what's relevant to you.</p>
           <ul className="mlogin-points">
-            <li><Icon name="shield" size={18}/> Procurement-ready policies &amp; governance</li>
-            <li><Icon name="file" size={18}/> Reusable templates for every assignment</li>
-            <li><Icon name="book" size={18}/> Field guides and MERL practice</li>
+            <li><Icon name="users" size={18}/> Clients — your engagement, deliverables &amp; shared files</li>
+            <li><Icon name="book" size={18}/> Associates — the operating library &amp; templates</li>
+            <li><Icon name="shield" size={18}/> Team — the back-office &amp; working documents</li>
           </ul>
         </div>
         <span className="mlogin-foot meta">Role-based access · public site stays separate</span>
       </div>
       <div className="mlogin-form-wrap">
-        <form className="mlogin-form" onSubmit={(e)=>{e.preventDefault(); onSignIn();}}>
+        <form className="mlogin-form" onSubmit={(e)=>{e.preventDefault(); onSignIn(role);}}>
           <h2 className="mlogin-form-h">Sign in</h2>
-          <p className="mlogin-form-sub">Welcome back. Sign in to the operating library.</p>
+          <p className="mlogin-form-sub">Welcome back. Sign in to the Future Partners members area.</p>
+          <div className="mlogin-roles">
+            <span className="mlogin-roles-h">Preview as</span>
+            <div className="mlogin-roles-seg">
+              {ROLE_OPTS.map(r=>(
+                <button type="button" key={r.id} className={"mlogin-role"+(role===r.id?" on":"")} onClick={()=>setRole(r.id)}>{r.label}</button>
+              ))}
+            </div>
+            <span className="mlogin-roles-hint">{ROLE_OPTS.find(r=>r.id===role).hint}</span>
+          </div>
           <label className="mf-field"><span>Email</span><input type="email" defaultValue="associate@futurepartners.co.nz"/></label>
           <label className="mf-field"><span>Password</span><input type="password" defaultValue="••••••••••"/></label>
           <div className="mlogin-row">
             <label className="mlogin-remember"><input type="checkbox" defaultChecked/> Keep me signed in</label>
             <a href="#/members" onClick={e=>e.preventDefault()} className="mlogin-forgot">Forgot password?</a>
           </div>
-          <Btn kind="primary" size="lg" arrow type="submit" className="mlogin-submit">Sign in to the library</Btn>
-          <p className="mlogin-note meta">DRAFT — this is a concept. Any details sign you in.</p>
+          <Btn kind="primary" size="lg" arrow type="submit" className="mlogin-submit">Sign in</Btn>
+          <p className="mlogin-note meta">DRAFT — a concept. Pick a role above to preview its space; any details sign you in.</p>
         </form>
       </div>
     </div>
@@ -346,4 +462,4 @@ function MemSearch({hits, q, onOpen, onClear}){
     </div>
   );
 }
-Object.assign(window, { Members });
+Object.assign(window, { Members, SpaceSwitcher, ConceptIntro, DocIcon, typeColor, visLabel });
