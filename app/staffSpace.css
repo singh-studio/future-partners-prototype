@@ -439,3 +439,30 @@ button.stf-wrow{width:100%;text-align:left;font-family:var(--font-body);backgrou
   .stf-seg{display:grid;grid-template-columns:1fr 1fr;gap:5px;border-radius:14px}
   .stf-seg-btn{flex:initial;padding:9px 6px}
 }
+
+/* ============================================================
+   EMAIL AT A GLANCE — CRM concept (connects to Outlook / M365 in production)
+   ============================================================ */
+.stf-email{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:28px}
+.stf-email.quiet{border-color:#F3DEC8}
+.stf-email-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.stf-email-h{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink-900)}
+.stf-email-h svg{color:var(--green-600);flex:0 0 auto}
+.stf-email-src{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--fg3)}
+.stf-email-preview{color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);padding:2px 7px;border-radius:var(--radius-pill)}
+.stf-email-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stf-email-stat{display:flex;flex-direction:column;gap:3px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 13px;min-width:0}
+.stf-email-n{font-family:var(--font-display);font-weight:700;font-size:1.02rem;color:var(--green-700);line-height:1.15;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis}
+.stf-email-l{font-size:11.5px;color:var(--fg3)}
+.stf-email-threads{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.stf-email-thread{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}
+.stf-email-thread:last-child{border-bottom:none}
+.stf-email-dir{flex:0 0 auto;font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;width:32px;text-align:center;padding:3px 0;border-radius:var(--radius-sm)}
+.stf-email-dir.in{color:var(--green-700);background:var(--green-50)}
+.stf-email-dir.out{color:var(--ink-500);background:var(--mist)}
+.stf-email-subj{flex:1;min-width:0;font-size:13.5px;color:var(--ink-800);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-email-when{flex:0 0 auto;font-size:12px;color:var(--fg3);font-family:var(--font-mono)}
+.stf-email-quiet{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:#C2691E;background:#FDF4EC;border:1px solid #F3DEC8;border-radius:var(--radius-sm);padding:9px 12px}
+.stf-email-quiet svg{flex:0 0 auto}
+.stf-email-note{display:block;margin-top:12px;font-size:11.5px;color:var(--fg3);line-height:1.45}
+@media (max-width:600px){.stf-email-stats{grid-template-columns:1fr 1fr}}

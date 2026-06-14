@@ -1039,6 +1039,35 @@ function StfContacts(){
 }
 
 /* ---------- person detail: details, org, projects, files, history ---------- */
+/* Email at a glance — a CRM concept. In the live version this reads Kirsty's
+   Outlook (Microsoft 365) via Microsoft Graph (metadata only, staff-only); here
+   it's deterministic mock data so each contact shows a stable, believable overview. */
+function stfEmailGlance(c){
+  var id=(c.id||c.name||"x"), h=0; for(var i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))>>>0;
+  var pick=function(arr,salt){ return arr[((h>>(salt||0))>>>0)%arr.length]; };
+  var recencies=["Today","Yesterday","2 days ago","Last week","2 weeks ago","3 weeks ago","Last month"];
+  var lastIdx = c.lead ? 0 : (h % recencies.length);
+  var proj=(c.cases||[]).map(function(x){return caseById(x);}).filter(Boolean)[0];
+  var ctx = proj ? proj.title.split(/[—:]/)[0].trim() : (c.org||"your work");
+  var place = proj && proj.country ? proj.country.name : (c.location||"in-country");
+  var second = c.type==="Funder/Donor" ? "Reporting timeline & milestones"
+             : c.type==="Associate"    ? "Availability for the next assignment"
+             :                            "Q2 invoice & progress note";
+  return {
+    last: recencies[lastIdx],
+    quiet: lastIdx>=5,
+    count: c.lead ? 0 : (6 + (h % 46)),
+    dir: (h&1) ? "in" : "out",
+    reply: pick(["within an hour","~2 hours","~4 hours","same day","next day","~2 days"],2),
+    lastMet: pick(["12 May 2026","28 Apr 2026","6 Mar 2026","9 Feb 2026",null,null],5),
+    subjects: [
+      {s:"Re: "+ctx,            d:recencies[lastIdx],                            dir:(h&1)?"in":"out"},
+      {s:second,                d:pick(["Last week","2 weeks ago","Apr 2026"],7),  dir:"out"},
+      {s:"Field notes — "+place, d:pick(["Apr 2026","Mar 2026","Feb 2026"],11),     dir:"in"},
+    ],
+  };
+}
+
 function StfPersonDetail({c, onBack, onOrg}){
   if(!c) return null;
   const projects = (c.cases||[]).map(id=>caseById(id)).filter(Boolean).slice(0,4);
@@ -1070,6 +1099,32 @@ function StfPersonDetail({c, onBack, onOrg}){
           <a href={"tel:"+c.phone.replace(/\s/g,"")} className="stf-contact-btn ghost"><Icon name="phone" size={15}/> Call</a>
         </div>
       </div>
+
+      {(function(){ var g=stfEmailGlance(c); return (
+        <div className={"stf-email"+(g.quiet?" quiet":"")}>
+          <div className="stf-email-head">
+            <span className="stf-email-h"><Icon name="mail" size={16}/> Email — at a glance</span>
+            <span className="stf-email-src">Outlook · Microsoft 365 <span className="stf-email-preview">preview</span></span>
+          </div>
+          <div className="stf-email-stats">
+            <div className="stf-email-stat"><span className="stf-email-n">{g.last}</span><span className="stf-email-l">{g.dir==="in"?"they emailed":"you emailed"}</span></div>
+            <div className="stf-email-stat"><span className="stf-email-n">{g.count}</span><span className="stf-email-l">emails exchanged</span></div>
+            <div className="stf-email-stat"><span className="stf-email-n">{g.reply}</span><span className="stf-email-l">typical reply</span></div>
+            <div className="stf-email-stat"><span className="stf-email-n">{g.lastMet||"—"}</span><span className="stf-email-l">last meeting</span></div>
+          </div>
+          <div className="stf-email-threads">
+            {g.subjects.map(function(s,i){ return (
+              <div className="stf-email-thread" key={i}>
+                <span className={"stf-email-dir "+s.dir}>{s.dir==="in"?"In":"Out"}</span>
+                <span className="stf-email-subj">{s.s}</span>
+                <span className="stf-email-when">{s.d}</span>
+              </div>
+            ); })}
+          </div>
+          {g.quiet && <div className="stf-email-quiet"><Icon name="clock" size={13}/> No email in a few weeks — might be worth a check-in.</div>}
+          <span className="stf-email-note">Concept — in the live version this connects to Kirsty's Outlook (Microsoft 365) and shows real activity. Metadata only, staff-only.</span>
+        </div>
+      ); })()}
 
       <div className="mdoc-detail">
         <div className="mdoc-reader">
