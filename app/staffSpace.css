@@ -466,3 +466,197 @@ button.stf-wrow{width:100%;text-align:left;font-family:var(--font-body);backgrou
 .stf-email-quiet svg{flex:0 0 auto}
 .stf-email-note{display:block;margin-top:12px;font-size:11.5px;color:var(--fg3);line-height:1.45}
 @media (max-width:600px){.stf-email-stats{grid-template-columns:1fr 1fr}}
+
+/* ============================================================
+   OWNER TREATMENT — chip + the subtle nav dot on Desk / Business
+   ============================================================ */
+.stf-ownerchip{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.03em;
+  font-weight:600;color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);
+  border-radius:var(--radius-pill);padding:4px 10px;white-space:nowrap}
+.stf-ownerchip svg{flex:0 0 auto;color:var(--green-600)}
+.stf-nav-ownerdot{width:6px;height:6px;border-radius:50%;background:var(--green-400);margin-left:6px;flex:0 0 auto}
+.mem-navitem.on .stf-nav-ownerdot{background:currentColor;opacity:.7}
+
+/* ============================================================
+   DESK + BUSINESS — shared shell (header, pulse tiles, two-col grid)
+   ============================================================ */
+.stf-desk-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.stf-desk-greet{flex:1;min-width:260px}
+.stf-desk-greet-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.stf-desk-greet .mhome-h1{margin:0 0 8px}
+.stf-desk-date{font-family:var(--font-mono);font-size:12px;letter-spacing:.02em;color:var(--fg3);white-space:nowrap}
+
+.stf-newbtn{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-body);font-size:14px;font-weight:600;color:#fff;
+  background:var(--green-600);border:1px solid var(--green-600);border-radius:var(--radius-pill);padding:11px 18px;cursor:pointer;
+  transition:all .14s;white-space:nowrap;flex:0 0 auto}
+.stf-newbtn:hover{background:var(--green-700);border-color:var(--green-700);box-shadow:var(--shadow-sm)}
+.stf-newbtn-plus{font-size:17px;line-height:1;font-weight:400;margin-top:-1px}
+
+/* pulse tiles (Desk metrics + Business top metrics) */
+.stf-pulse{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.stf-pulse-tile{display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:18px 20px}
+.stf-pulse-n{font-family:var(--font-display);font-weight:700;font-size:1.7rem;line-height:1.05;color:var(--green-700);letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis}
+.stf-pulse-l{font-size:13px;font-weight:600;color:var(--ink-900)}
+.stf-pulse-sub{font-size:12px;color:var(--fg3)}
+.stf-pulse-tile.warn{background:#FDF4EC;border-color:#F3DEC8}
+.stf-pulse-tile.warn .stf-pulse-n{color:#C2691E}
+
+.stf-desk-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:start}
+.stf-desk-col{min-width:0}
+
+/* ============================================================
+   DESK — "needs you today" actions, live engagements, network pulse
+   ============================================================ */
+.stf-actions{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.stf-action{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:13px;align-items:center;width:100%;text-align:left;
+  font-family:var(--font-body);background:none;border:none;border-top:1px solid var(--line);padding:14px 18px;cursor:pointer;transition:background .14s}
+.stf-actions .stf-action:first-child{border-top:none}
+.stf-action:hover{background:var(--green-50)}
+.stf-action>svg{color:var(--green-400);flex:0 0 auto}
+.stf-action-ic{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;flex:0 0 auto;
+  background:var(--green-50);color:var(--green-600)}
+.stf-action-ic.due{background:#FDF1E7;color:#C2691E}
+.stf-action-ic.over{background:#FBEAEA;color:#C0392B}
+.stf-action-ic.info{background:var(--green-50);color:var(--green-600)}
+.stf-action-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.stf-action-t{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--ink-900);line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-action-s{font-size:12px;color:var(--fg3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* urgency tags */
+.stf-utag{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.03em;font-weight:600;
+  text-transform:uppercase;padding:4px 9px;border-radius:var(--radius-pill);white-space:nowrap;flex:0 0 auto;
+  color:var(--ink-500);background:var(--mist);border:1px solid var(--cloud)}
+.stf-utag.due{color:#C2691E;background:#FDF4EC;border-color:#F3DEC8}
+.stf-utag.over{color:#C0392B;background:#FBEAEA;border-color:#F0CFCF}
+.stf-utag.info{color:var(--green-700);background:var(--green-50);border-color:var(--green-100)}
+
+/* live engagements */
+.stf-engs{padding:0}
+.stf-eng{display:flex;flex-direction:column;gap:8px;padding:15px 18px;border-top:1px solid var(--line)}
+.stf-list .stf-eng:first-child{border-top:none}
+.stf-eng-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.stf-eng-title{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--ink-900);line-height:1.3;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-eng-stage{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.02em;text-transform:uppercase;font-weight:600;
+  color:var(--green-700);flex:0 0 auto}
+.stf-eng-next{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--fg2)}
+.stf-eng-next svg{color:var(--green-500);flex:0 0 auto}
+
+/* the 7-dot cycle strip */
+.stf-dots{display:inline-flex;align-items:center;gap:7px}
+.stf-dot{width:9px;height:9px;border-radius:50%;background:var(--cloud);flex:0 0 auto;transition:background .14s}
+.stf-dot.done{background:var(--green-300)}
+.stf-dot.now{background:var(--green-600);box-shadow:0 0 0 3px var(--green-100)}
+
+.stf-netpulse{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:var(--fg2);line-height:1.5}
+.stf-netpulse svg{color:var(--green-500);flex:0 0 auto}
+
+/* ============================================================
+   BUSINESS — receivables, utilisation bars, margins
+   ============================================================ */
+.stf-num{text-align:right;justify-content:flex-end}
+.stf-recv-head{display:grid;grid-template-columns:64px minmax(0,1fr) 100px 56px 90px;gap:14px;align-items:center;padding:11px 18px;
+  background:var(--paper);font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)}
+.stf-recv{display:grid;grid-template-columns:64px minmax(0,1fr) 100px 56px 90px;gap:14px;align-items:center;padding:13px 18px;border-top:1px solid var(--line)}
+.stf-list .stf-recv:first-of-type{border-top:none}
+.stf-recv:hover{background:var(--green-50)}
+.stf-recv-id{font-family:var(--font-mono);font-size:12.5px;font-weight:600;color:var(--ink-800)}
+.stf-recv-org{font-size:13px;color:var(--ink-800);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-recv-amt{font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--ink-900)}
+.stf-bizflag{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.03em;text-transform:uppercase;
+  font-weight:600;padding:4px 9px;border-radius:var(--radius-pill);white-space:nowrap}
+.stf-bizflag.ok{color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100)}
+.stf-bizflag.over{color:#C0392B;background:#FBEAEA;border:1px solid #F0CFCF}
+
+/* utilisation */
+.stf-utilbox{padding:4px 0}
+.stf-util{display:flex;align-items:center;gap:13px;padding:13px 18px;border-top:1px solid var(--line)}
+.stf-list .stf-util:first-child{border-top:none}
+.stf-util-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.stf-util-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.stf-util-name{font-size:13.5px;font-weight:500;color:var(--ink-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-util-pct{font-family:var(--font-display);font-weight:700;font-size:13.5px;color:var(--green-700);flex:0 0 auto}
+.stf-util-pct.high{color:#C2691E}
+.stf-util-pct.low{color:var(--fg3)}
+
+/* plain CSS bar (utilisation + margins) */
+.stf-bar{height:8px;border-radius:var(--radius-pill);background:var(--mist);overflow:hidden;width:100%}
+.stf-bar.lg{height:10px}
+.stf-bar-fill{display:block;height:100%;border-radius:var(--radius-pill);background:var(--green-500);transition:width .3s ease}
+.stf-bar-fill.ok{background:var(--green-500)}
+.stf-bar-fill.high{background:#D9742B}
+.stf-bar-fill.low{background:var(--green-300)}
+
+/* project margins */
+.stf-margins{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:2px}
+.stf-margin{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;display:flex;flex-direction:column;gap:11px}
+.stf-margin.risk{border-color:#F0CFCF}
+.stf-margin-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.stf-margin-title{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--ink-900);line-height:1.3;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stf-margin-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--fg2)}
+.stf-margin-left{font-weight:600;color:var(--green-700)}
+
+/* ============================================================
+   NEW ENGAGEMENT — form + "what we'll set up" preview
+   ============================================================ */
+.stf-ne-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:22px;align-items:start}
+.stf-ne-form{display:flex;flex-direction:column;gap:0}
+.stf-ne-form .stf-fields{margin-top:14px}
+.stf-ne-actions{display:flex;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.stf-ne-actions .btn{flex:1;justify-content:center}
+.stf-ne-note{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:11.5px;color:var(--fg3);line-height:1.45}
+.stf-ne-note svg{color:var(--green-600);flex:0 0 auto}
+
+.stf-ne-preview{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;display:flex;flex-direction:column;gap:18px}
+.stf-ne-block{display:flex;flex-direction:column;gap:11px;min-width:0}
+.stf-ne-blk-h{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;font-size:13.5px;color:var(--ink-900)}
+.stf-ne-blk-h svg{color:var(--green-600);flex:0 0 auto}
+.stf-ne-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+
+.stf-ne-checklist,.stf-ne-slots,.stf-ne-folders,.stf-ne-compliance{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.stf-ne-checklist li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-800)}
+.stf-ne-box{width:15px;height:15px;border-radius:5px;border:1.5px solid var(--green-300);background:var(--green-50);flex:0 0 auto}
+.stf-ne-slots li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-800)}
+.stf-av-empty{background:var(--mist);color:var(--green-600);border:1.5px dashed var(--green-300);font-size:15px;font-weight:400}
+.stf-ne-folders li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-800)}
+.stf-ne-folders li svg,.stf-ne-compliance li svg{color:var(--green-500);flex:0 0 auto}
+.stf-ne-compliance li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-800)}
+.stf-ne-compliance li .stf-utag{margin-left:auto}
+
+/* ============================================================
+   DESK / BUSINESS / NEW ENGAGEMENT — RESPONSIVE
+   ============================================================ */
+@media (max-width:1080px){
+  .stf-pulse{grid-template-columns:repeat(2,1fr)}
+  .stf-desk-grid{grid-template-columns:1fr;gap:18px}
+  .stf-ne-grid{grid-template-columns:1fr;gap:18px}
+}
+@media (max-width:768px){
+  .stf-margins{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .stf-desk-head{flex-direction:column;gap:14px}
+  .stf-newbtn{width:100%;justify-content:center}
+  .stf-pulse{grid-template-columns:1fr 1fr;gap:10px}
+  .stf-pulse-n{font-size:1.45rem}
+  /* actions: let the title wrap, push tag below */
+  .stf-action{grid-template-columns:auto minmax(0,1fr) auto;padding:13px 14px;gap:11px}
+  .stf-action>svg{display:none}
+  .stf-action-t{white-space:normal}
+  .stf-action-s{white-space:normal}
+  /* receivables → card mode */
+  .stf-recv-head{display:none}
+  .stf-recv{grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px}
+  .stf-recv-id{grid-column:1;grid-row:1}
+  .stf-recv-org{grid-column:1;grid-row:2;white-space:normal}
+  .stf-recv-amt{grid-column:2;grid-row:1;text-align:right}
+  .stf-recv .stf-meta{grid-column:2;grid-row:2;text-align:right}
+  .stf-recv>.stf-col:last-child{grid-column:1 / -1;grid-row:3;justify-content:flex-start;margin-top:4px}
+  /* new engagement: stack the preview's two-up blocks */
+  .stf-ne-cols{grid-template-columns:1fr;gap:16px}
+  .stf-ne-preview{padding:18px 16px}
+}

@@ -428,10 +428,12 @@ function StfDocBody({body, footLine}){
    share one list: filing a file in Incoming makes it appear in the Library.
    ===================================================================== */
 function StaffSpace({signOut, switcher}){
-  const [section, setSection] = useState("incoming"); // incoming | library | contacts | guide
+  const [section, setSection] = useState("desk"); // desk | incoming | library | contacts | business | guide
   const [inbox, setInbox]     = useState(STF_INBOX);
   const [filed, setFiled]     = useState([]); // items filed this session → join the Library
   const [search, setSearch]   = useState("");
+  const [newEng, setNewEng]   = useState(false); // the "+ New engagement" sub-view (Feature 3)
+  const [contactJump, setContactJump] = useState(null); // a contact id the Desk wants to open
 
   /* file a freshly-arrived item: mark it filed in the inbox, add a Library record */
   const fileItem = (item, choice)=>{
@@ -455,11 +457,17 @@ function StaffSpace({signOut, switcher}){
   const needsCount = inbox.filter(i=>i.status==="needs").length;
 
   const NAV = [
+    {id:"desk",     icon:"grid",     label:"Desk",     owner:true},
     {id:"incoming", icon:"download", label:"Incoming", count:needsCount},
     {id:"library",  icon:"folder",   label:"Library",  count:library.length},
     {id:"contacts", icon:"users",    label:"Contacts", count:STF_CONTACTS.length},
+    {id:"business", icon:"layers",   label:"Business", owner:true},
     {id:"guide",    icon:"book",     label:"Website guide"},
   ];
+
+  /* jump helpers the Desk hands down — keep one routing path through the root */
+  const goSection = (id)=>{ setNewEng(false); setSearch(""); setSection(id); };
+  const openContact = (id)=>{ setContactJump(id); setSearch(""); setSection("contacts"); };
 
   /* a tiny global search across the library, scoped to staff content */
   const searchHits = search.trim()
@@ -476,8 +484,9 @@ function StaffSpace({signOut, switcher}){
         {switcher && <SpaceSwitcher {...switcher}/>}
         <nav className="mem-nav">
           {NAV.map(n=>(
-            <button key={n.id} className={"mem-navitem"+(section===n.id?" on":"")} onClick={()=>{setSection(n.id); setSearch("");}}>
+            <button key={n.id} className={"mem-navitem"+(section===n.id?" on":"")+(n.owner?" stf-nav-owner":"")} onClick={()=>{setSection(n.id); setNewEng(false); setSearch("");}}>
               <Icon name={n.icon} size={18}/> {n.label}
+              {n.owner && <span className="stf-nav-ownerdot" title="Owner — you & delegates"/>}
               {n.count!=null && <span className="mem-navcount">{n.count}</span>}
             </button>
           ))}
@@ -507,12 +516,16 @@ function StaffSpace({signOut, switcher}){
           {typeof ConceptIntro !== "undefined" && <ConceptIntro space="staff"/>}
           {searchHits
             ? <StfLibrary docs={library} externalHits={searchHits} searchTerm={search} onClearSearch={()=>setSearch("")}/>
-            : <React.Fragment>
-                {section==="incoming" && <StfIncoming inbox={inbox} onFile={fileItem}/>}
-                {section==="library"  && <StfLibrary docs={library}/>}
-                {section==="contacts" && <StfContacts/>}
-                {section==="guide"    && <StfGuide/>}
-              </React.Fragment>}
+            : newEng
+              ? <StfNewEngagement onBack={()=>setNewEng(false)}/>
+              : <React.Fragment>
+                  {section==="desk"     && <StfDesk inbox={inbox} library={library} onSection={goSection} onContact={openContact} onNew={()=>setNewEng(true)}/>}
+                  {section==="incoming" && <StfIncoming inbox={inbox} onFile={fileItem}/>}
+                  {section==="library"  && <StfLibrary docs={library}/>}
+                  {section==="contacts" && <StfContacts jumpTo={contactJump} onConsumeJump={()=>setContactJump(null)}/>}
+                  {section==="business" && <StfBusiness/>}
+                  {section==="guide"    && <StfGuide/>}
+                </React.Fragment>}
         </div>
       </div>
     </div>
@@ -537,6 +550,66 @@ function StfWhoBadge({audience}){
   const cls = audience==="public" ? "vis-public" : audience==="staff" ? "vis-archived" : "vis-membersOnly";
   return <span className={"vis "+cls}>{audLabel(audience)}</span>;
 }
+/* the small owner treatment shown on Desk + Business (conceptual — no RBAC) */
+function StfOwnerChip(){
+  return <span className="stf-ownerchip"><Icon name="shield" size={12}/> Owner · you &amp; delegates</span>;
+}
+/* a compact 7-dot project-cycle strip (mirrors the client space cycle, dots only) */
+function StfCycleDots({stageKey}){
+  const idx = CYCLE.findIndex(s=>s.key===stageKey);
+  return (
+    <span className="stf-dots" title={`Stage ${idx+1} of ${CYCLE.length}`}>
+      {CYCLE.map((s,i)=>(
+        <span key={s.key} className={"stf-dot"+(i<idx?" done":"")+(i===idx?" now":"")}/>
+      ))}
+    </span>
+  );
+}
+
+/* =====================================================================
+   DESK + BUSINESS — derived numbers, kept consistent with the file's mock
+   data so the owner's morning view never contradicts the rest of the app.
+   Receivables / margins / utilisation are believable NZD mock figures.
+   ===================================================================== */
+const fmtNZD = n => "$"+Number(n).toLocaleString("en-NZ");
+
+/* the live engagements Kirsty is watching — drawn from CASES, varied stages,
+   each with a believable next milestone. Order = least → most progressed. */
+const STF_ACTIVE = [
+  {id:"nauru-health",  milestone:"Systems review — final sign-off (Fri)"},
+  {id:"childfund-wash",milestone:"WASH design workshop write-up due"},
+  {id:"niue-gcf",      milestone:"GCF accreditation — financials to lodge"},
+  {id:"savechildren-eval", milestone:"Inception report → client review"},
+  {id:"oxfam-eval",    milestone:"Kōtui report with MFAT for approval"},
+  {id:"unicef-merl",   milestone:"Framework refresh — phase 2 scoping"},
+];
+
+/* outstanding invoices (receivables) — real orgs from CASES / STF_CONTACTS */
+const STF_RECEIVABLES = [
+  {id:"056", org:"Nauru Ministry of Health", amount:31600, age:12, overdue:true},
+  {id:"061", org:"MFAT · Manatū Aorere",     amount:48200, age:9,  overdue:false},
+  {id:"058", org:"Oxfam Aotearoa",           amount:22400, age:24, overdue:true},
+  {id:"063", org:"UNICEF Aotearoa",          amount:17800, age:6,  overdue:false},
+  {id:"064", org:"Save the Children NZ",      amount:14500, age:3,  overdue:false},
+  {id:"055", org:"ChildFund NZ",             amount:9600,  age:18, overdue:false},
+];
+
+/* associate utilisation — believable % against capacity, derived names from PEOPLE */
+const STF_UTIL = [
+  {pid:"david",     util:92},
+  {pid:"eileen",    util:78},
+  {pid:"brucetta",  util:64},
+  {pid:"elisabeth", util:48},
+  {pid:"ian",       util:34},
+];
+
+/* project margins — budget vs spent, on-track / at-risk */
+const STF_MARGINS = [
+  {id:"nauru-health",  budget:142000, spent:96000},
+  {id:"oxfam-eval",    budget:88000,  spent:81000},
+  {id:"unicef-merl",   budget:64000,  spent:39000},
+  {id:"savechildren-eval", budget:74000, spent:71500},
+];
 
 /* =====================================================================
    1 · INCOMING — the showpiece. Files arrive from anywhere, we save a copy
@@ -909,13 +982,18 @@ function StfLibraryDoc({doc, onBack}){
    People · Organisations. Filter people by type & status; open a person
    to see their details, projects, files and a history of contact.
    ===================================================================== */
-function StfContacts(){
+function StfContacts({jumpTo, onConsumeJump}){
   const [tab, setTab]       = useState("people"); // people | orgs
   const [openPerson, setOpenPerson] = useState(null);
   const [openOrg, setOpenOrg]       = useState(null);
   const [search, setSearch] = useState("");
   const [type, setType]     = useState("All");
   const [status, setStatus] = useState("All");
+
+  /* the Desk can ask us to open a specific contact (a "going quiet" nudge) */
+  useEffect(()=>{
+    if(jumpTo){ setTab("people"); setOpenPerson(jumpTo); onConsumeJump && onConsumeJump(); }
+  },[jumpTo]);
 
   if(openPerson){
     const c = STF_CONTACTS.find(x=>x.id===openPerson);
@@ -1338,6 +1416,353 @@ function StfGuideDoc({doc, onBack}){
             </div>
           </div>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+/* =====================================================================
+   FEATURE 1 · DIRECTOR'S DESK — Kirsty's morning command centre.
+   Everything here derives from the file's own mock data so the numbers stay
+   consistent with Incoming, Contacts and the active engagements.
+   ===================================================================== */
+function StfDesk({inbox, library, onSection, onContact, onNew}){
+  /* — derive the day's realities from existing data — */
+  const needs    = inbox.filter(i=>i.status==="needs");
+  const expiring = needs.filter(i=>i.expiresIn!=null);
+
+  const active = STF_ACTIVE.map(a=>({...a, c:caseById(a.id)})).filter(a=>a.c);
+  const overdueTotal = STF_RECEIVABLES.filter(r=>r.overdue).reduce((s,r)=>s+r.amount,0);
+  const newEnquiries = 2;
+
+  /* network pulse */
+  const associates = PEOPLE.filter(p=>!p.lead && (p.id!=="greg"&&p.id!=="julie")).length;
+  const countries  = new Set(active.map(a=>a.c.country && a.c.country.name).filter(Boolean)).size;
+
+  /* the prioritised "needs you today" list — built from the data above */
+  const actions = [
+    {icon:"file",  title:"Nauru systems review — your sign-off", sub:"David sent it · due Friday", tag:"Due soon", tagCls:"due", onClick:()=>onSection("incoming")},
+    {icon:"clock", title:`Invoice #056 — Nauru MoH · ${fmtNZD(31600)}`, sub:"12 days overdue · worth a chase", tag:"Overdue", tagCls:"over", onClick:()=>onSection("business")},
+    {icon:"mail",  title:"Kōtui report — with MFAT for approval", sub:"James Tugaga · waiting 4 days", tag:"Chase", tagCls:"neutral", onClick:()=>onContact("c-james-oxfam")},
+    {icon:"download", title:`${needs.length} file${needs.length===1?"":"s"} to file in Incoming`, sub:expiring.length?`${expiring.length} from WeTransfer — link expiring`:"Waiting to be filed", tag:expiring.length?"Expiring":"To file", tagCls:expiring.length?"due":"neutral", onClick:()=>onSection("incoming")},
+    {icon:"users", title:"MFAT — no contact in 5 weeks", sub:"Tepaeru Herrmann · relationship going quiet", tag:"Nudge", tagCls:"neutral", onClick:()=>onContact("c-tepaeru")},
+    {icon:"globe", title:`${newEnquiries} new enquiries from the website`, sub:"Fred Hollows · WWF New Zealand", tag:"New", tagCls:"info", onClick:()=>onContact("c-fredhollows")},
+  ];
+
+  const pulse = [
+    {n:active.length, l:"Live engagements", sub:"on the cycle"},
+    {n:actions.filter(a=>a.tagCls==="due"||a.tagCls==="over").length, l:"Need you today", sub:"time-sensitive"},
+    {n:newEnquiries, l:"New enquiries", sub:"from the website"},
+    {n:fmtNZD(overdueTotal), l:"Overdue", sub:"across 2 invoices", warn:true},
+  ];
+
+  const today = "Sunday · 14 June 2026";
+
+  return (
+    <div className="stf-desk">
+      {/* header / greeting */}
+      <div className="stf-desk-head">
+        <div className="stf-desk-greet">
+          <div className="stf-desk-greet-row">
+            <p className="eyebrow">Director's Desk</p>
+            <StfOwnerChip/>
+          </div>
+          <h1 className="mhome-h1">Kia ora, Kirsty</h1>
+          <p className="mhome-lead fp-lead">Here's your desk this morning. <span className="stf-desk-date">{today}</span></p>
+        </div>
+        <button className="stf-newbtn" onClick={onNew}><span className="stf-newbtn-plus">+</span> New engagement</button>
+      </div>
+
+      {/* pulse tiles */}
+      <div className="stf-pulse">
+        {pulse.map((p,i)=>(
+          <div className={"stf-pulse-tile"+(p.warn?" warn":"")} key={i}>
+            <span className="stf-pulse-n">{p.n}</span>
+            <span className="stf-pulse-l">{p.l}</span>
+            <span className="stf-pulse-sub">{p.sub}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="stf-desk-grid">
+        {/* needs you today */}
+        <div className="stf-desk-col">
+          <span className="mem-sec-h">Needs you today</span>
+          <div className="stf-actions">
+            {actions.map((a,i)=>(
+              <button className="stf-action" key={i} onClick={a.onClick}>
+                <span className={"stf-action-ic "+a.tagCls}><Icon name={a.icon} size={17}/></span>
+                <span className="stf-action-body">
+                  <span className="stf-action-t">{a.title}</span>
+                  <span className="stf-action-s">{a.sub}</span>
+                </span>
+                <span className={"stf-utag "+a.tagCls}>{a.tag}</span>
+                <Icon name="chevron" size={15}/>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* live engagements */}
+        <div className="stf-desk-col">
+          <span className="mem-sec-h">Live engagements, on the cycle</span>
+          <div className="stf-list stf-engs">
+            {active.map(a=>{
+              const stage = STAGE[a.c.stage]||{};
+              return (
+                <div className="stf-eng" key={a.id}>
+                  <div className="stf-eng-top">
+                    <span className="stf-eng-title">{a.c.title}</span>
+                    <span className="stf-eng-stage">{stage.name}</span>
+                  </div>
+                  <span className="stf-eng-next"><Icon name="arrow" size={13}/> {a.milestone}</span>
+                  <StfCycleDots stageKey={a.c.stage}/>
+                </div>
+              );
+            })}
+          </div>
+          <p className="stf-netpulse">
+            <Icon name="globe" size={14}/> Network pulse — {associates} associates engaged · {countries} countries active this week
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =====================================================================
+   FEATURE 2 · BUSINESS HEALTH — a calm, owner-only financial view.
+   Mock NZD figures; receivables reuse real orgs; bars are plain CSS.
+   ===================================================================== */
+function StfBusiness(){
+  const invoiced  = 412800;
+  const outstanding = STF_RECEIVABLES.reduce((s,r)=>s+r.amount,0);
+  const overdue   = STF_RECEIVABLES.filter(r=>r.overdue).reduce((s,r)=>s+r.amount,0);
+  const pipeline  = 286000;
+
+  const metrics = [
+    {n:fmtNZD(invoiced), l:"Invoiced this quarter", sub:"Apr–Jun FY26"},
+    {n:fmtNZD(outstanding), l:"Outstanding (owed)", sub:`${STF_RECEIVABLES.length} invoices`},
+    {n:fmtNZD(overdue), l:"Overdue", sub:"needs chasing", warn:true},
+    {n:fmtNZD(pipeline), l:"Pipeline (weighted)", sub:"proposals out"},
+  ];
+
+  return (
+    <div className="stf-biz">
+      <div className="stf-desk-head">
+        <div className="stf-desk-greet">
+          <div className="stf-desk-greet-row">
+            <p className="eyebrow">Business health</p>
+            <StfOwnerChip/>
+          </div>
+          <h1 className="mhome-h1">How the practice is tracking.</h1>
+          <p className="mhome-lead fp-lead">A calm read on the numbers that matter — what's been invoiced, what's owed, who's busy, and whether projects are on budget. A concept view; figures here are illustrative.</p>
+        </div>
+      </div>
+
+      {/* top metrics */}
+      <div className="stf-pulse">
+        {metrics.map((m,i)=>(
+          <div className={"stf-pulse-tile"+(m.warn?" warn":"")} key={i}>
+            <span className="stf-pulse-n">{m.n}</span>
+            <span className="stf-pulse-l">{m.l}</span>
+            <span className="stf-pulse-sub">{m.sub}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="stf-desk-grid">
+        {/* receivables */}
+        <div className="stf-desk-col">
+          <span className="mem-sec-h">Receivables — what's owed</span>
+          <div className="stf-list">
+            <div className="stf-recv-head">
+              <span>Invoice</span><span className="stf-col">Client</span><span className="stf-col stf-num">Amount</span><span className="stf-col stf-num">Age</span><span className="stf-col stf-num">Status</span>
+            </div>
+            {STF_RECEIVABLES.map(r=>(
+              <div className="stf-recv" key={r.id}>
+                <span className="stf-recv-id">#{r.id}</span>
+                <span className="stf-col stf-recv-org">{r.org}</span>
+                <span className="stf-col stf-num stf-recv-amt">{fmtNZD(r.amount)}</span>
+                <span className="stf-col stf-num stf-meta">{r.age}d</span>
+                <span className="stf-col stf-num">
+                  <span className={"stf-bizflag "+(r.overdue?"over":"ok")}>{r.overdue?"Overdue":"Open"}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* utilisation */}
+        <div className="stf-desk-col">
+          <span className="mem-sec-h">Associate utilisation</span>
+          <div className="stf-list stf-utilbox">
+            {STF_UTIL.map(u=>{
+              const p = personById(u.pid);
+              const band = u.util>=85 ? "high" : u.util<45 ? "low" : "ok";
+              return (
+                <div className="stf-util" key={u.pid}>
+                  <span className={"stf-av "+(p&&p.fill||"fill-forest")}>{p?p.initials:"—"}</span>
+                  <div className="stf-util-body">
+                    <div className="stf-util-row">
+                      <span className="stf-util-name">{p?p.name:u.pid}</span>
+                      <span className={"stf-util-pct "+band}>{u.util}%</span>
+                    </div>
+                    <div className="stf-bar"><span className={"stf-bar-fill "+band} style={{width:u.util+"%"}}/></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="stf-netpulse"><Icon name="users" size={14}/> Aim for 60–85% — over is a burnout risk, under is bench time.</p>
+        </div>
+      </div>
+
+      {/* project margins */}
+      <span className="mem-sec-h">Project margins — budget vs spent</span>
+      <div className="stf-margins">
+        {STF_MARGINS.map(m=>{
+          const c = caseById(m.id)||{};
+          const pct = Math.round(m.spent/m.budget*100);
+          const risk = pct>=95;
+          const left = m.budget - m.spent;
+          return (
+            <div className={"stf-margin"+(risk?" risk":"")} key={m.id}>
+              <div className="stf-margin-top">
+                <span className="stf-margin-title">{c.title||m.id}</span>
+                <span className={"stf-bizflag "+(risk?"over":"ok")}>{risk?"At risk":"On track"}</span>
+              </div>
+              <div className="stf-bar lg"><span className={"stf-bar-fill "+(risk?"high":"ok")} style={{width:Math.min(100,pct)+"%"}}/></div>
+              <div className="stf-margin-foot">
+                <span>{fmtNZD(m.spent)} of {fmtNZD(m.budget)} · {pct}%</span>
+                <span className="stf-margin-left">{fmtNZD(left)} left</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* =====================================================================
+   FEATURE 3 · NEW ENGAGEMENT — "day-one structure, zero setup".
+   A light, inert form + a preview of everything that gets auto-built.
+   ===================================================================== */
+function StfNewEngagement({onBack}){
+  const [name, setName]   = useState("");
+  const [org, setOrg]     = useState("");
+  const [sector, setSec]  = useState(SECTORS[0]);
+  const [region, setReg]  = useState(REGIONS[0]);
+  const [lead, setLead]   = useState("kirsty");
+
+  const deliverables = ["Inception report","Work plan & schedule","Stakeholder map","Risk register","Final report"];
+  const compliance   = ["Safeguarding declaration","Conflict-of-interest checks","Health, safety & travel sign-off"];
+
+  return (
+    <div className="stf-newengage">
+      <button className="mdoc-back" onClick={onBack}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Back to the desk</button>
+
+      <div className="stf-desk-greet" style={{marginBottom:"20px"}}>
+        <div className="stf-desk-greet-row">
+          <p className="eyebrow">New engagement</p>
+          <StfOwnerChip/>
+        </div>
+        <h1 className="mhome-h1">Start a project — day-one structure, zero setup.</h1>
+        <p className="mhome-lead fp-lead">Tell us the basics. The moment you create it, Future Partners builds out the whole engagement for you — the cycle, the deliverables, the team, the folders and the compliance checks — so you start with structure, not a blank page.</p>
+      </div>
+
+      <div className="stf-ne-grid">
+        {/* the light form */}
+        <div className="mem-panel stf-ne-form">
+          <span className="mem-panel-h">The basics</span>
+          <div className="stf-fields">
+            <label className="stf-field">
+              <span>Engagement name</span>
+              <input className="stf-input" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Tonga health systems review"/>
+            </label>
+            <label className="stf-field">
+              <span>Client / organisation</span>
+              <input className="stf-input" value={org} onChange={e=>setOrg(e.target.value)} placeholder="e.g. MFAT · Manatū Aorere" list="stf-ne-orgs"/>
+              <datalist id="stf-ne-orgs">{CLIENTS.map(c=><option key={c} value={c}/>)}</datalist>
+            </label>
+            <div className="stf-field-row">
+              <label className="stf-field">
+                <span>Sector</span>
+                <div className="stf-select"><Icon name="compass" size={15}/>
+                  <select value={sector} onChange={e=>setSec(e.target.value)}>{SECTORS.map(s=><option key={s} value={s}>{s}</option>)}</select>
+                  <Icon name="chevronDown" size={15}/>
+                </div>
+              </label>
+              <label className="stf-field">
+                <span>Region</span>
+                <div className="stf-select"><Icon name="globe" size={15}/>
+                  <select value={region} onChange={e=>setReg(e.target.value)}>{REGIONS.map(r=><option key={r} value={r}>{r}</option>)}</select>
+                  <Icon name="chevronDown" size={15}/>
+                </div>
+              </label>
+            </div>
+            <label className="stf-field">
+              <span>Lead</span>
+              <div className="stf-select"><Icon name="users" size={15}/>
+                <select value={lead} onChange={e=>setLead(e.target.value)}>{PEOPLE.filter(p=>p.id!=="greg"&&p.id!=="julie").map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select>
+                <Icon name="chevronDown" size={15}/>
+              </div>
+            </label>
+          </div>
+          <div className="stf-ne-actions">
+            <Btn kind="secondary" size="sm" onClick={onBack}>Cancel</Btn>
+            <Btn kind="primary" size="sm" arrow onClick={onBack}>Create engagement</Btn>
+          </div>
+          <span className="stf-ne-note"><Icon name="shield" size={13}/> Concept — nothing is saved. Creating it would scaffold everything on the right.</span>
+        </div>
+
+        {/* what we'll set up for you */}
+        <div className="stf-ne-preview">
+          <span className="mem-panel-h">What we'll set up for you</span>
+
+          <div className="stf-ne-block">
+            <span className="stf-ne-blk-h"><Icon name="compass" size={15}/> Project cycle — starts at Scope</span>
+            <div className="stf-list">
+              <div className="stf-eng" style={{borderTop:"none"}}>
+                <StfCycleDots stageKey="scope"/>
+                <span className="stf-eng-next" style={{marginTop:"8px"}}>The 7-stage cycle, initialised — first milestone lands in Scope.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="stf-ne-cols">
+            <div className="stf-ne-block">
+              <span className="stf-ne-blk-h"><Icon name="check" size={15}/> Deliverable checklist</span>
+              <ul className="stf-ne-checklist">
+                {deliverables.map(d=><li key={d}><span className="stf-ne-box"/>{d}</li>)}
+              </ul>
+            </div>
+            <div className="stf-ne-block">
+              <span className="stf-ne-blk-h"><Icon name="users" size={15}/> Team slots</span>
+              <ul className="stf-ne-slots">
+                <li><span className={"stf-av "+(personById(lead)&&personById(lead).fill||"fill-forest")}>{personById(lead)?personById(lead).initials:"—"}</span> {personById(lead)?personById(lead).name:"Lead"} <span className="stf-tag">Lead</span></li>
+                <li><span className="stf-av stf-av-empty">+</span> Associate to assign</li>
+                <li><span className="stf-av stf-av-empty">+</span> Associate to assign</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="stf-ne-cols">
+            <div className="stf-ne-block">
+              <span className="stf-ne-blk-h"><Icon name="folder" size={15}/> Library folders</span>
+              <ul className="stf-ne-folders">
+                {STF_COLLECTIONS.map(c=><li key={c}><Icon name="folder" size={13}/> {c}</li>)}
+              </ul>
+            </div>
+            <div className="stf-ne-block">
+              <span className="stf-ne-blk-h"><Icon name="shield" size={15}/> Compliance queued</span>
+              <ul className="stf-ne-compliance">
+                {compliance.map(c=><li key={c}><Icon name="clock" size={13}/> {c} <span className="stf-utag neutral">Queued</span></li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

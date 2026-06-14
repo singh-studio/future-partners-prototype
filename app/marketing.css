@@ -1,0 +1,174 @@
+/* marketing.css — styles for the public Impact + Trust pages (prefixes: imp- / tru-).
+   Uses the public site's design tokens (--green-*, --ink-*, --line, --radius-*, --shadow-*)
+   and matches the section rhythm of home.jsx / pages.jsx. No hard-coded brand colours. */
+
+/* =====================================================================
+   IMPACT — "proof, measured"
+   ===================================================================== */
+.imp-hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+
+/* ---- headline numbers ---- */
+.imp-numbers-note{max-width:22em;margin:0;font-size:1rem;text-align:right}
+.imp-statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+.imp-stat{background:var(--surface);padding:34px 30px;display:flex;flex-direction:column;gap:10px;transition:background .18s}
+.imp-stat:hover{background:var(--green-50)}
+.imp-stat-n{font-family:var(--font-display);font-weight:700;font-size:clamp(2.4rem,4vw,3.1rem);line-height:.95;
+  letter-spacing:-.03em;color:var(--green-600)}
+.imp-stat-l{font-size:14px;line-height:1.5;color:var(--fg2);max-width:15em}
+
+/* ---- impact across the cycle (vertical bars) ---- */
+.imp-cycle{position:relative;background:var(--green-900);color:#fff;overflow:hidden}
+.imp-cycle .wrap{position:relative;z-index:1}
+.imp-cycle-koru{position:absolute;left:-140px;bottom:-120px;width:520px;height:520px;z-index:0}
+.imp-cycle .fp-h2{color:#fff}
+.imp-cycle .sec-head .eyebrow{margin-bottom:0}
+.imp-cycle-intro{color:var(--fg-on-dark-dim);margin:14px 0 0;max-width:34em}
+.imp-cycle .btn-ghost{color:var(--green-300)}
+.imp-cycle .btn-ghost:hover{color:#fff}
+.imp-cyclebars{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;align-items:end;margin-top:8px}
+.imp-cyclebar{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;
+  padding:18px 8px 16px;border-radius:var(--radius);border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.03);transition:background .18s,border-color .18s,transform .18s}
+.imp-cyclebar:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.28);transform:translateY(-3px)}
+.imp-cyclebar-head{display:flex;flex-direction:column;align-items:center}
+.imp-cyclebar-n{font-family:var(--font-display);font-weight:700;font-size:1.9rem;line-height:1;color:#fff;display:flex;flex-direction:column;align-items:center;gap:5px}
+.imp-cyclebar-stage{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--green-300);font-weight:500}
+.imp-cyclebar-track{width:14px;height:120px;border-radius:var(--radius-pill);background:rgba(255,255,255,.08);
+  display:flex;align-items:flex-end;overflow:hidden}
+.imp-cyclebar-fill{width:100%;border-radius:var(--radius-pill);
+  background:linear-gradient(180deg,var(--green-300),var(--green-500));min-height:14%}
+.imp-cyclebar-verb{font-weight:600;font-size:13px;color:var(--fg-on-dark)}
+
+/* ---- by sector & region ---- */
+.imp-break{background:var(--mist)}
+.imp-break-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.imp-break-h{font-family:var(--font-display);font-weight:700;font-size:1.4rem;color:var(--ink-900);margin:8px 0 22px}
+.imp-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px}
+.imp-bar{display:grid;grid-template-columns:11.5em 1fr 1.6em;gap:14px;align-items:center}
+.imp-bar-label{font-size:14px;color:var(--fg1);font-weight:500;line-height:1.25}
+.imp-bar-track{height:9px;border-radius:var(--radius-pill);background:var(--cloud);overflow:hidden}
+.imp-bar-fill{display:block;height:100%;border-radius:var(--radius-pill);
+  background:linear-gradient(90deg,var(--green-400),var(--green-600));min-width:8px}
+.imp-bar-fill.alt{background:linear-gradient(90deg,var(--green-300),var(--green-500))}
+.imp-bar-n{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--green-700);text-align:right}
+.imp-break-foot{margin:22px 0 0}
+
+/* ---- real outcomes ---- */
+.imp-outcomes-intro{margin:14px 0 0;max-width:36em}
+.imp-outcomegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.imp-outcome{position:relative;display:flex;flex-direction:column;gap:12px;background:var(--green-900);color:#fff;
+  border-radius:var(--radius-lg);padding:26px 24px;box-shadow:var(--shadow);overflow:hidden;
+  transition:transform .2s,box-shadow .2s}
+.imp-outcome:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.imp-outcome-stage{align-self:flex-start}
+.imp-outcome-n{font-family:var(--font-display);font-weight:700;font-size:1.45rem;line-height:1.15;letter-spacing:-.01em;color:#fff;margin-top:2px}
+.imp-outcome-l{font-size:14px;line-height:1.5;color:var(--fg-on-dark-dim);flex:1}
+.imp-outcome-foot{display:flex;flex-direction:column;gap:9px;padding-top:14px;border-top:1px solid rgba(255,255,255,.13)}
+.imp-outcome-place{font-size:12.5px;color:var(--fg-on-dark-dim);line-height:1.4}
+.imp-outcome-link{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:var(--green-300)}
+.imp-outcome-link .arr{transition:transform .18s}
+.imp-outcome:hover .imp-outcome-link .arr{transform:translateX(4px)}
+
+/* ---- who we work with (dark band, like home ProofBand) ---- */
+.imp-clients{position:relative;background:var(--green-900);color:#fff;overflow:hidden;
+  border-top:1px solid rgba(255,255,255,.08)}
+.imp-clients-koru{position:absolute;right:-120px;top:-80px;width:520px;height:520px;z-index:0}
+.imp-clients-in{position:relative;z-index:1;display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:center;padding:64px 40px}
+.imp-clients-sub{font-weight:300;font-size:1.05rem;line-height:1.55;color:var(--fg-on-dark-dim);margin:10px 0 0;max-width:24em}
+.imp-clients-logos{display:flex;flex-wrap:wrap;gap:14px 18px}
+
+/* ---- testimonial ---- */
+.imp-testi{background:var(--green-50);border-top:1px solid var(--green-100);border-bottom:1px solid var(--green-100)}
+.imp-testi-card{position:relative;max-width:46em;margin:26px 0 0;padding:24px 0 4px 30px;border-left:2px solid var(--green-300)}
+.imp-testi-quote{position:relative;font-family:var(--font-display);font-weight:300;font-size:clamp(1.35rem,2.3vw,1.7rem);
+  line-height:1.45;color:var(--ink-800);margin:0 0 24px;letter-spacing:-.01em}
+.imp-testi-card .testi-mark{left:24px}
+
+/* ---- closing CTA ---- */
+.imp-close{background:var(--mist)}
+.imp-close-in{max-width:42em}
+.imp-close-in h2{margin:8px 0 16px}
+.imp-close-in .fp-lead{margin:0 0 28px}
+.imp-close-actions{display:flex;gap:14px;flex-wrap:wrap}
+
+/* =====================================================================
+   TRUST & SECURITY — calm, credible
+   ===================================================================== */
+.tru-hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+.tru-hero-badge{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:24px 24px;box-shadow:var(--shadow-sm);max-width:18em}
+.tru-hero-badge-ic{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:15px;
+  background:var(--green-50);color:var(--green-600)}
+.tru-hero-badge-t{font-family:var(--font-display);font-weight:600;font-size:1.05rem;line-height:1.4;color:var(--ink-900)}
+
+/* ---- the six cards ---- */
+.tru-intro{margin:14px 0 0;max-width:34em}
+.tru-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tru-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:30px 28px;box-shadow:var(--shadow-sm);transition:transform .18s,box-shadow .18s,border-color .18s}
+.tru-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--green-200)}
+.tru-card-ic{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;
+  background:var(--green-50);color:var(--green-600);margin-bottom:18px}
+.tru-card-h{font-family:var(--font-display);font-weight:700;font-size:1.2rem;color:var(--ink-900);margin:0 0 10px}
+.tru-card-lead{font-size:14.5px;line-height:1.55;color:var(--fg2);margin:0 0 18px}
+.tru-card-list{list-style:none;margin:0;padding:18px 0 0;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;gap:13px}
+.tru-card-list li{display:flex;gap:11px;align-items:flex-start}
+.tru-card-list li svg{flex:0 0 auto;color:var(--green-500);margin-top:2px}
+.tru-card-list li span{font-size:13.5px;line-height:1.5;color:var(--fg2)}
+
+/* ---- standards & affiliations (dark band) ---- */
+.tru-standards{position:relative;background:var(--green-900);color:#fff;overflow:hidden;padding:var(--space-9) 0}
+.tru-standards-koru{position:absolute;right:-130px;top:-90px;width:520px;height:520px;z-index:0}
+.tru-standards-in{position:relative;z-index:1;display:grid;grid-template-columns:.95fr 1.05fr;gap:56px;align-items:center}
+.tru-standards-h{font-family:var(--font-display);font-weight:700;font-size:clamp(1.6rem,2.4vw,2.05rem);
+  line-height:1.2;letter-spacing:-.015em;color:#fff;margin:8px 0 16px}
+.tru-standards-sub{font-weight:300;font-size:1.08rem;line-height:1.6;color:var(--fg-on-dark-dim);margin:0;max-width:30em}
+.tru-standards-list{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tru-standard{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:20px 20px}
+.tru-standard-ic{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 auto;
+  border-radius:12px;background:rgba(255,255,255,.08);color:var(--green-300)}
+.tru-standard-body{display:flex;flex-direction:column;gap:5px}
+.tru-standard-t{font-family:var(--font-display);font-weight:600;font-size:14.5px;line-height:1.3;color:#fff}
+.tru-standard-d{font-size:13px;line-height:1.5;color:var(--fg-on-dark-dim)}
+
+/* ---- reassuring close ---- */
+.tru-close{background:var(--mist);text-align:center}
+.tru-close-in{max-width:40em;margin:0 auto}
+.tru-close-ic{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:18px;
+  background:var(--green-50);color:var(--green-600);margin-bottom:22px}
+.tru-close-in h2{margin:8px 0 16px}
+.tru-close-in .fp-lead{margin:0 auto 28px}
+.tru-close-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+@media (max-width:980px){
+  .imp-clients-in{grid-template-columns:1fr;gap:28px;padding:48px 32px}
+  .tru-standards-in{grid-template-columns:1fr;gap:36px}
+}
+@media (max-width:768px){
+  .imp-numbers-note{text-align:left;margin-top:6px}
+  .imp-statgrid{grid-template-columns:1fr 1fr}
+  .imp-stat{padding:26px 22px}
+  .imp-cyclebars{grid-template-columns:repeat(4,1fr);gap:10px}
+  .imp-cyclebar-track{height:96px}
+  .imp-break-grid{grid-template-columns:1fr;gap:40px}
+  .imp-outcomegrid{grid-template-columns:1fr 1fr}
+  .tru-grid{grid-template-columns:1fr}
+  .tru-standards-list{grid-template-columns:1fr}
+  .tru-card{padding:26px 24px}
+}
+@media (max-width:520px){
+  .imp-statgrid{grid-template-columns:1fr}
+  .imp-cyclebars{grid-template-columns:repeat(2,1fr);gap:12px}
+  .imp-outcomegrid{grid-template-columns:1fr}
+  .imp-bar{grid-template-columns:9em 1fr 1.5em;gap:10px}
+  .imp-bar-label{font-size:13px}
+  .imp-clients-in{padding:40px 24px}
+  .imp-testi-card{padding-left:22px}
+  .imp-testi-card .testi-mark{left:16px}
+}

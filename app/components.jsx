@@ -178,6 +178,7 @@ function useReveal(){ /* entrances are CSS-driven (.reveal); no JS class togglin
 const NAV = [
   {label:"Services", to:"/services"},
   {label:"Our work", to:"/atlas"},
+  {label:"Impact", to:"/impact"},
   {label:"People", to:"/people"},
   {label:"News", to:"/news"},
 ];
@@ -281,10 +282,11 @@ function CTAFooter({onContact}){
           <div className="foot-col">
             <span className="foot-h">Explore</span>
             <Link to="/atlas">Case study atlas</Link>
+            <Link to="/impact">Our impact</Link>
             <Link to="/services">Services &amp; the project cycle</Link>
             <Link to="/people">People &amp; associates</Link>
             <Link to="/news">News &amp; insights</Link>
-            <Link to="/#approach">Our approach</Link>
+            <Link to="/trust">Trust &amp; security</Link>
           </div>
           <div className="foot-col">
             <span className="foot-h">Associates</span>

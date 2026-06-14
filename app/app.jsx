@@ -108,6 +108,8 @@ function App(){
   else if(route.parts[0]==="news" && route.parts[1]) view = has("NewsArticle") ? <NewsArticle id={route.parts[1]} onContact={onContact}/> : <Placeholder name="Article"/>;
   else if(route.path==="/news") view = has("NewsView") ? <NewsView onContact={onContact}/> : <Placeholder name="News & insights"/>;
   else if(route.path==="/services") view = has("ServicesView") ? <ServicesView onContact={onContact}/> : <Placeholder name="Services"/>;
+  else if(route.path==="/impact") view = has("ImpactView") ? <ImpactView onContact={onContact}/> : <Placeholder name="Live impact"/>;
+  else if(route.path==="/trust") view = has("TrustView") ? <TrustView onContact={onContact}/> : <Placeholder name="Trust & security"/>;
   else view = <Placeholder name="Not found"/>;
 
   const bareMembers = route.path==="/members" && has("Members"); // members handles its own chrome
