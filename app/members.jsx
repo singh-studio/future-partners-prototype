@@ -33,7 +33,7 @@ const MDOCS = [
   {id:"t2", cat:"templates", title:"Evaluation Terms of Reference", type:"DOCX", owner:"Editor", updated:"Apr 2026", version:"v3.2", visibility:"membersOnly", summary:"ToR scaffold for reviews and evaluations, aligned to MERL practice."},
   {id:"t3", cat:"templates", title:"Inception Report template", type:"DOCX", owner:"Editor", updated:"Feb 2026", version:"v2.1", visibility:"membersOnly", summary:"Get an assignment moving with a clear inception structure."},
   {id:"t4", cat:"templates", title:"Programme Budget template", type:"XLSX", owner:"Editor", updated:"Mar 2026", version:"v2.5", visibility:"membersOnly", summary:"Costing workbook with value-for-money checks built in."},
-  {id:"t5", cat:"templates", title:"Field Trip Report template", type:"DOCX", owner:"AssociateMember", updated:"Jan 2026", version:"v1.4", visibility:"membersOnly", summary:"Capture what mattered from an in-country visit."},
+  {id:"t5", cat:"templates", title:"Field Trip Report template", type:"DOCX", owner:"Associate", updated:"Jan 2026", version:"v1.4", visibility:"membersOnly", summary:"Capture what mattered from an in-country visit."},
 
   {id:"g1", cat:"guides", title:"MERL framework guide", type:"PDF", owner:"Editor", updated:"May 2026", version:"v2.0", visibility:"membersOnly", summary:"Designing monitoring, evaluation, research and learning that partners can use.",
    body:[
@@ -69,7 +69,7 @@ const MDOCS = [
 ];
 
 const typeColor = {PDF:"#C0392B",DOCX:"#2A6FDB",XLSX:"#1F8A5B",PPTX:"#D9742B",ZIP:"#6B5BD2",Web:"#157F69",INDD:"#C2387A"};
-const visLabel = {membersOnly:"Members only", public:"Public", archived:"Archived", draft:"Draft"};
+const visLabel = {membersOnly:"Associates", public:"Everyone", archived:"Archived", draft:"Draft"};
 
 /* =====================================================================
    THE GATE — one locked login, three role-aware spaces.
@@ -208,7 +208,7 @@ function AssociateSpace({signOut, switcher}){
         <div className="mem-side-foot">
           <div className="mem-user">
             <span className="mem-user-av">AM</span>
-            <div className="mem-user-id"><span className="mem-user-name">Associate member</span><span className="mem-user-role">Role · AssociateMember</span></div>
+            <div className="mem-user-id"><span className="mem-user-name">Associate member</span><span className="mem-user-role">Role · Associate</span></div>
           </div>
           <button className="mem-signout" onClick={signOut}><Icon name="lock" size={15}/> Sign out</button>
         </div>
