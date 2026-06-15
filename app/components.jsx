@@ -214,7 +214,7 @@ function Header({route, onContact}){
           ))}
         </nav>
         <div className="site-head-cta">
-          <a href="#/members" className="site-login" onClick={(e)=>{e.preventDefault(); go("/members");}}><Icon name="lock" size={14}/> Associates login</a>
+          <a href="#/members" className="site-login" onClick={(e)=>{e.preventDefault(); go("/members");}}><Icon name="lock" size={14}/> Sign in</a>
           <Btn kind="primary" size="sm" arrow onClick={onContact}>Work with us</Btn>
         </div>
         <button className="site-burger" aria-label="Open menu" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/></button>
@@ -241,7 +241,7 @@ function Header({route, onContact}){
           ))}
         </nav>
         <div className="wrap mobmenu-foot" style={{animationDelay:(150+NAV.length*65)+"ms"}}>
-          <a href="#/members" className="mobmenu-login" onClick={(e)=>{e.preventDefault(); go("/members");}}><Icon name="lock" size={15}/> Associates login</a>
+          <a href="#/members" className="mobmenu-login" onClick={(e)=>{e.preventDefault(); go("/members");}}><Icon name="lock" size={15}/> Sign in</a>
           <Btn kind="primary" size="lg" arrow onClick={()=>{setOpen(false); onContact();}}>Work with us</Btn>
           <div className="mobmenu-contact">
             <a href="tel:+64210672680">+64 21 067 2680</a>
@@ -289,10 +289,9 @@ function CTAFooter({onContact}){
             <Link to="/trust">Trust &amp; security</Link>
           </div>
           <div className="foot-col">
-            <span className="foot-h">Associates</span>
-            <Link to="/members">Associates login</Link>
-            <Link to="/members">Policies &amp; governance</Link>
-            <Link to="/members">Templates &amp; guides</Link>
+            <span className="foot-h">Members</span>
+            <Link to="/members">Sign in</Link>
+            <span className="meta" style={{textTransform:"none"}}>For clients, associates &amp; our team</span>
           </div>
           <div className="foot-col">
             <span className="foot-h">Contact</span>
