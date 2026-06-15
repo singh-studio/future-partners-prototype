@@ -5,7 +5,7 @@ const MCATS = [
   {id:"templates", name:"Templates",             icon:"file",   count:5, blurb:"Reusable starting points for every assignment.", visibility:"membersOnly"},
   {id:"guides",    name:"Guides & how-tos",       icon:"book",   count:4, blurb:"Field practice, MERL and working in the region.", visibility:"membersOnly"},
   {id:"news",      name:"Newsletters",            icon:"mail",   count:3, blurb:"Quarterly updates across the network.", visibility:"membersOnly"},
-  {id:"brand",     name:"Collateral & brand",     icon:"layers", count:4, blurb:"Logos, capability statements and decks.", visibility:"membersOnly"},
+  {id:"brand",     name:"Brand & collateral",     icon:"layers", count:4, blurb:"Logos, capability statements and decks.", visibility:"membersOnly"},
   {id:"archive",   name:"Archived case studies",  icon:"folder", count:6, blurb:"Earlier projects, kept for reference.", visibility:"archived"},
 ];
 

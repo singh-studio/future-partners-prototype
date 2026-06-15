@@ -428,7 +428,9 @@ function StfDocBody({body, footLine}){
    share one list: filing a file in Incoming makes it appear in the Library.
    ===================================================================== */
 function StaffSpace({signOut, switcher}){
-  const [section, setSection] = useState("desk"); // desk | incoming | library | contacts | business | guide
+  const [section, setSection] = useState("desk"); // desk | files | contacts | business
+  const [filesTab, setFilesTab] = useState("library"); // library | inbox — the two states of Files
+  const [helpOpen, setHelpOpen] = useState(false); // Website guide, now reached from the footer
   const [inbox, setInbox]     = useState(STF_INBOX);
   const [filed, setFiled]     = useState([]); // items filed this session → join the Library
   const [search, setSearch]   = useState("");
@@ -458,16 +460,20 @@ function StaffSpace({signOut, switcher}){
 
   const NAV = [
     {id:"desk",     icon:"grid",     label:"Desk",     owner:true},
-    {id:"incoming", icon:"download", label:"Incoming", count:needsCount},
-    {id:"library",  icon:"folder",   label:"Library",  count:library.length},
+    {id:"files",    icon:"folder",   label:"Files",    count:needsCount}, // Inbox + Library, merged
     {id:"contacts", icon:"users",    label:"Contacts", count:STF_CONTACTS.length},
     {id:"business", icon:"layers",   label:"Business", owner:true},
-    {id:"guide",    icon:"book",     label:"Website guide"},
   ];
 
-  /* jump helpers the Desk hands down — keep one routing path through the root */
-  const goSection = (id)=>{ setNewEng(false); setSearch(""); setSection(id); };
-  const openContact = (id)=>{ setContactJump(id); setSearch(""); setSection("contacts"); };
+  /* jump helpers the Desk hands down — keep one routing path through the root.
+     The Desk still points at "incoming"; route that to Files → Inbox sub-tab. */
+  const goSection = (id)=>{
+    setNewEng(false); setSearch(""); setHelpOpen(false);
+    if(id==="incoming"){ setFilesTab("inbox"); setSection("files"); return; }
+    if(id==="library"){ setFilesTab("library"); setSection("files"); return; }
+    setSection(id);
+  };
+  const openContact = (id)=>{ setContactJump(id); setSearch(""); setHelpOpen(false); setSection("contacts"); };
 
   /* a tiny global search across the library, scoped to staff content */
   const searchHits = search.trim()
@@ -484,7 +490,7 @@ function StaffSpace({signOut, switcher}){
         {switcher && <SpaceSwitcher {...switcher}/>}
         <nav className="mem-nav">
           {NAV.map(n=>(
-            <button key={n.id} className={"mem-navitem"+(section===n.id?" on":"")+(n.owner?" stf-nav-owner":"")} onClick={()=>{setSection(n.id); setNewEng(false); setSearch("");}}>
+            <button key={n.id} className={"mem-navitem"+(section===n.id && !helpOpen?" on":"")+(n.owner?" stf-nav-owner":"")} onClick={()=>{setSection(n.id); setNewEng(false); setSearch(""); setHelpOpen(false);}}>
               <Icon name={n.icon} size={18}/> {n.label}
               {n.owner && <span className="stf-nav-ownerdot" title="Owner — you & delegates"/>}
               {n.count!=null && <span className="mem-navcount">{n.count}</span>}
@@ -496,7 +502,10 @@ function StaffSpace({signOut, switcher}){
             <span className="mem-user-av">KB</span>
             <div className="mem-user-id"><span className="mem-user-name">Kirsty Burnett</span><span className="mem-user-role">Role · Staff</span></div>
           </div>
-          <button className="mem-signout" onClick={signOut}><Icon name="lock" size={15}/> Sign out</button>
+          <div className="stf-foot-actions">
+            <button className={"stf-help"+(helpOpen?" on":"")} onClick={()=>{ setHelpOpen(true); setNewEng(false); setSearch(""); }}><Icon name="book" size={15}/> Help</button>
+            <button className="mem-signout" onClick={signOut}><Icon name="lock" size={15}/> Sign out</button>
+          </div>
         </div>
       </aside>
 
@@ -504,7 +513,7 @@ function StaffSpace({signOut, switcher}){
         <header className="mem-top">
           <label className="mem-search">
             <Icon name="search" size={18}/>
-            <input value={search} onChange={e=>{setSearch(e.target.value); if(e.target.value.trim()) setSection("library");}} placeholder="Search the Library…"/>
+            <input value={search} onChange={e=>{setSearch(e.target.value); if(e.target.value.trim()){ setHelpOpen(false); setFilesTab("library"); setSection("files"); }}} placeholder="Search the Library…"/>
           </label>
           <div className="mem-top-actions">
             <span className="mem-draftpill">DRAFT · concept</span>
@@ -516,16 +525,16 @@ function StaffSpace({signOut, switcher}){
           {typeof ConceptIntro !== "undefined" && <ConceptIntro space="staff"/>}
           {searchHits
             ? <StfLibrary docs={library} externalHits={searchHits} searchTerm={search} onClearSearch={()=>setSearch("")}/>
-            : newEng
-              ? <StfNewEngagement onBack={()=>setNewEng(false)}/>
-              : <React.Fragment>
-                  {section==="desk"     && <StfDesk inbox={inbox} library={library} onSection={goSection} onContact={openContact} onNew={()=>setNewEng(true)}/>}
-                  {section==="incoming" && <StfIncoming inbox={inbox} onFile={fileItem}/>}
-                  {section==="library"  && <StfLibrary docs={library}/>}
-                  {section==="contacts" && <StfContacts jumpTo={contactJump} onConsumeJump={()=>setContactJump(null)}/>}
-                  {section==="business" && <StfBusiness/>}
-                  {section==="guide"    && <StfGuide/>}
-                </React.Fragment>}
+            : helpOpen
+              ? <StfGuide onClose={()=>setHelpOpen(false)}/>
+              : newEng
+                ? <StfNewEngagement onBack={()=>setNewEng(false)}/>
+                : <React.Fragment>
+                    {section==="desk"     && <StfDesk inbox={inbox} library={library} onSection={goSection} onContact={openContact} onNew={()=>setNewEng(true)}/>}
+                    {section==="files"    && <StfFiles tab={filesTab} onTab={setFilesTab} inbox={inbox} library={library} needsCount={needsCount} onFile={fileItem}/>}
+                    {section==="contacts" && <StfContacts jumpTo={contactJump} onConsumeJump={()=>setContactJump(null)}/>}
+                    {section==="business" && <StfBusiness/>}
+                  </React.Fragment>}
         </div>
       </div>
     </div>
@@ -612,10 +621,38 @@ const STF_MARGINS = [
 ];
 
 /* =====================================================================
+   FILES — one home, two states. Inbox = files not yet filed; Library =
+   filed files. A segmented toggle (reusing the Contacts stf-toggle pattern)
+   switches between them; both share the root's inbox/library/onFile, so
+   filing in the Inbox makes a file appear in the Library — same loop, one section.
+   ===================================================================== */
+function StfFiles({tab, onTab, inbox, library, needsCount, onFile}){
+  return (
+    <div className="stf-files">
+      <div className="mhome-head">
+        <p className="eyebrow">Files</p>
+        <h1 className="mhome-h1">One home for every file.</h1>
+        <p className="mhome-lead fp-lead">Inbox is what's just arrived and not yet filed; the Library is everything that's been filed. Two states, one place — file something in the Inbox and it lands in the Library.</p>
+      </div>
+
+      {/* Library · Inbox sub-tab toggle */}
+      <div className="stf-toggle stf-files-toggle">
+        <button className={"stf-toggle-btn"+(tab==="library"?" on":"")} onClick={()=>onTab("library")}><Icon name="folder" size={15}/> Library <span className="stf-pill-n">{library.length}</span></button>
+        <button className={"stf-toggle-btn"+(tab==="inbox"?" on":"")} onClick={()=>onTab("inbox")}><Icon name="download" size={15}/> Inbox {needsCount>0 && <span className="stf-pill-n stf-pill-warn">{needsCount}</span>}</button>
+      </div>
+
+      {tab==="library"
+        ? <StfLibrary docs={library} hideHead/>
+        : <StfIncoming inbox={inbox} onFile={onFile} hideHead/>}
+    </div>
+  );
+}
+
+/* =====================================================================
    1 · INCOMING — the showpiece. Files arrive from anywhere, we save a copy
    the moment they land, and a quick "File it" step puts each one in the Library.
    ===================================================================== */
-function StfIncoming({inbox, onFile}){
+function StfIncoming({inbox, onFile, hideHead}){
   const [filing, setFiling] = useState(null); // the item being filed
 
   const needs    = inbox.filter(i=>i.status==="needs");
@@ -624,11 +661,13 @@ function StfIncoming({inbox, onFile}){
 
   return (
     <div className="stf-inbox">
-      <div className="mhome-head">
-        <p className="eyebrow">Incoming</p>
-        <h1 className="mhome-h1">One place for every file — however it arrives.</h1>
-        <p className="mhome-lead fp-lead">Associates send working files from wherever they are — Dropbox, Drive, WeTransfer, a plain email. Everything lands here, we save a copy the moment it arrives, and a quick step files each one into the Library. No more links that stop working.</p>
-      </div>
+      {!hideHead && (
+        <div className="mhome-head">
+          <p className="eyebrow">Incoming</p>
+          <h1 className="mhome-h1">One place for every file — however it arrives.</h1>
+          <p className="mhome-lead fp-lead">Associates send working files from wherever they are — Dropbox, Drive, WeTransfer, a plain email. Everything lands here, we save a copy the moment it arrives, and a quick step files each one into the Library. No more links that stop working.</p>
+        </div>
+      )}
 
       {/* WAYS IN */}
       <span className="mem-sec-h">Add files</span>
@@ -800,7 +839,7 @@ function StfFileModal({item, onClose, onFile}){
    Filters: collection · file type · who can see it. Click a row to read it.
    `externalHits` (optional) wires the top-bar search into the same view.
    ===================================================================== */
-function StfLibrary({docs, externalHits, searchTerm, onClearSearch}){
+function StfLibrary({docs, externalHits, searchTerm, onClearSearch, hideHead}){
   const [openId, setOpenId]   = useState(null);
   const [collection, setColl] = useState("All");
   const [ftype, setFtype]     = useState("All");
@@ -828,11 +867,13 @@ function StfLibrary({docs, externalHits, searchTerm, onClearSearch}){
 
   return (
     <div className="stf-library">
-      <div className="mhome-head">
-        <p className="eyebrow">Library</p>
-        <h1 className="mhome-h1">Every filed document, easy to find.</h1>
-        <p className="mhome-lead fp-lead">Everything that's been filed lives here — policies, templates, guides, brand files, client work and the team's own records. Search it, or narrow it down by collection, file type, or who can see it.</p>
-      </div>
+      {!hideHead && (
+        <div className="mhome-head">
+          <p className="eyebrow">Library</p>
+          <h1 className="mhome-h1">Every filed document, easy to find.</h1>
+          <p className="mhome-lead fp-lead">Everything that's been filed lives here — policies, templates, guides, brand files, client work and the team's own records. Search it, or narrow it down by collection, file type, or who can see it.</p>
+        </div>
+      )}
 
       {usingTopSearch ? (
         <div className="stf-lib-searchnote">
@@ -1354,15 +1395,16 @@ function StfOrgDetail({org, onBack, onPerson}){
 /* =====================================================================
    4 · WEBSITE GUIDE — doc cards → reader body (reuses .mdoc-doc)
    ===================================================================== */
-function StfGuide(){
+function StfGuide({onClose}){
   const [openId, setOpenId] = useState(null);
   const doc = openId ? STF_GUIDE.find(r=>r.id===openId) : null;
   if(doc) return <StfGuideDoc doc={doc} onBack={()=>setOpenId(null)}/>;
 
   return (
     <div className="stf-guide">
+      {onClose && <button className="mdoc-back" onClick={onClose}><Icon name="arrow" size={15} style={{transform:"rotate(180deg)"}}/> Back</button>}
       <div className="mhome-head">
-        <p className="eyebrow">Guide</p>
+        <p className="eyebrow">Help · Website guide</p>
         <h1 className="mhome-h1">Website guide</h1>
         <p className="mhome-lead fp-lead">How this website actually works, in plain words — what it's built on, how to edit it, how to publish a change and undo one, the look and feel, and where the logins are kept. A living draft for Kirsty and the team.</p>
       </div>

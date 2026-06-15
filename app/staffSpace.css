@@ -660,3 +660,26 @@ button.stf-wrow{width:100%;text-align:left;font-family:var(--font-body);backgrou
   .stf-ne-cols{grid-template-columns:1fr;gap:16px}
   .stf-ne-preview{padding:18px 16px}
 }
+
+/* ===================== FILES (Inbox + Library merged) ===================== */
+/* the Library · Inbox sub-tab sits just under the Files heading */
+.stf-files-toggle{margin-top:2px}
+/* the Inbox count rides warm to read as "needs attention" */
+.stf-pill-warn{background:#FBEBDD;color:#B45F22}
+.stf-toggle-btn.on .stf-pill-warn{background:rgba(255,255,255,.2);color:#fff}
+
+/* ===================== SIDEBAR FOOTER: Help + Sign out ===================== */
+/* Help (the Website guide) now lives beside Sign out, not in the main nav */
+.stf-foot-actions{display:flex;align-items:center;gap:10px}
+.stf-foot-actions .mem-signout{flex:1 1 auto;justify-content:center}
+.stf-help{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;background:none;border:1px solid rgba(255,255,255,.15);
+  color:var(--fg-on-dark-dim);font-family:var(--font-body);font-size:13.5px;font-weight:500;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all .14s}
+.stf-help svg{flex:0 0 auto;color:var(--ink-400);transition:color .14s}
+.stf-help:hover{background:rgba(255,255,255,.06);color:#fff}
+.stf-help:hover svg{color:var(--green-300)}
+.stf-help.on{background:var(--green-600);border-color:transparent;color:#fff}
+.stf-help.on svg{color:#fff}
+@media (max-width:900px){
+  /* at mobile the footer is a row; keep Help + Sign out together, no stretch */
+  .stf-foot-actions .mem-signout{flex:0 0 auto}
+}
