@@ -57,7 +57,7 @@ function TrustView({onContact}){
         <div className="wrap page-hero-in">
           <div className="page-hero-text">
             <p className="eyebrow">Trust &amp; security</p>
-            <h1 className="page-h1">Built for the trust our partners place in us.</h1>
+            <h1 className="page-h1">How we handle data, access and trust.</h1>
             <p className="fp-lead page-lead">Governments, UN agencies and funders ask the hard questions before they sign — about data, access, privacy and conduct. Here is how Future Partners is built to answer them: plainly, and without over-claiming.</p>
             <div className="tru-hero-actions">
               <Btn kind="primary" size="lg" arrow onClick={onContact}>Talk to us about your requirements</Btn>
@@ -78,7 +78,7 @@ function TrustView({onContact}){
           <div className="sec-head reveal">
             <div>
               <p className="eyebrow">The essentials</p>
-              <h2 className="fp-h2">What we look after, and how.</h2>
+              <h2 className="fp-h2">What we look after</h2>
               <p className="tru-intro fp-lead">Six things every serious client checks — answered the way we'd answer them in a tender response.</p>
             </div>
           </div>
@@ -105,7 +105,7 @@ function TrustView({onContact}){
         <div className="wrap tru-standards-in">
           <div className="tru-standards-head">
             <p className="eyebrow on-dark">Standards &amp; affiliations</p>
-            <h2 className="tru-standards-h">We work to the standards of the sector we serve.</h2>
+            <h2 className="tru-standards-h">The standards we work to.</h2>
             <p className="tru-standards-sub">Future Partners is affiliated with the New Zealand Council for International Development — and holds itself to the conduct, safeguarding and accountability expectations that come with it.</p>
           </div>
           <div className="tru-standards-list">
@@ -132,7 +132,7 @@ function TrustView({onContact}){
         <div className="wrap tru-close-in reveal">
           <span className="tru-close-ic"><Icon name="shield" size={30}/></span>
           <p className="eyebrow">No surprises</p>
-          <h2 className="fp-h2">If your requirements go further, we'll meet you there.</h2>
+          <h2 className="fp-h2">Tell us what you need.</h2>
           <p className="fp-lead">Every client comes with their own security, privacy and reporting obligations. Tell us yours, and we'll show you exactly how we'll meet them — one point of contact, honest answers, no surprises.</p>
           <div className="tru-close-actions">
             <Btn kind="primary" size="lg" arrow onClick={onContact}>Talk to us about your requirements</Btn>

@@ -53,8 +53,8 @@ function ImpactView({onContact}){
       <section className="page-hero imp-hero">
         <div className="wrap page-hero-in">
           <div className="page-hero-text">
-            <p className="eyebrow">Proof, not blog posts</p>
-            <h1 className="page-h1">Impact you can measure, across the whole project cycle.</h1>
+            <p className="eyebrow">Our impact</p>
+            <h1 className="page-h1">Our impact, across the whole project cycle.</h1>
             <p className="fp-lead page-lead">Every figure on this page is drawn straight from the work we've delivered — the same record funders, governments and UN partners can open, project by project, in the case study atlas. No vanity metrics, just what we've done and what it changed.</p>
             <div className="imp-hero-actions">
               <Btn kind="primary" size="lg" arrow to="/atlas">Open the case study atlas</Btn>
@@ -75,7 +75,7 @@ function ImpactView({onContact}){
           <div className="sec-head reveal">
             <div>
               <p className="eyebrow">By the numbers</p>
-              <h2 className="fp-h2">A track record, not a pitch.</h2>
+              <h2 className="fp-h2">Our track record</h2>
             </div>
             <p className="imp-numbers-note fp-lead">Counted live from the work in the atlas — so what you read here is exactly what's on the record.</p>
           </div>
@@ -97,7 +97,7 @@ function ImpactView({onContact}){
           <div className="sec-head reveal">
             <div>
               <p className="eyebrow">Across the project cycle</p>
-              <h2 className="fp-h2">Wherever you are in the work, we've delivered there.</h2>
+              <h2 className="fp-h2">Projects at every stage of the cycle</h2>
               <p className="imp-cycle-intro fp-lead">From framing the problem to improving what's already running — the count of projects we've shaped at each of the seven stages.</p>
             </div>
             <Btn kind="ghost" arrow to="/services">How we work the cycle</Btn>
@@ -157,7 +157,7 @@ function ImpactView({onContact}){
           <div className="sec-head reveal">
             <div>
               <p className="eyebrow">Real outcomes</p>
-              <h2 className="fp-h2">What changed on the ground.</h2>
+              <h2 className="fp-h2">What the work changed</h2>
               <p className="imp-outcomes-intro fp-lead">A few results in the partners' own terms — each one drawn from a case study you can open and read in full.</p>
             </div>
           </div>
@@ -212,8 +212,8 @@ function ImpactView({onContact}){
       {/* ---------- closing CTA ---------- */}
       <section className="imp-close section">
         <div className="wrap imp-close-in reveal">
-          <p className="eyebrow">See for yourself</p>
-          <h2 className="fp-h2">The proof is mapped, project by project.</h2>
+          <p className="eyebrow">The atlas</p>
+          <h2 className="fp-h2">Every project, on the map.</h2>
           <p className="fp-lead">Open the atlas to explore every assignment behind these numbers — or tell us about the outcome you're trying to reach.</p>
           <div className="imp-close-actions">
             <Btn kind="primary" size="lg" arrow to="/atlas">Explore the work</Btn>

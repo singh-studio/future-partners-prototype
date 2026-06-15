@@ -631,7 +631,7 @@ function StfFiles({tab, onTab, inbox, library, needsCount, onFile}){
     <div className="stf-files">
       <div className="mhome-head">
         <p className="eyebrow">Files</p>
-        <h1 className="mhome-h1">One home for every file.</h1>
+        <h1 className="mhome-h1">Inbox and Library</h1>
         <p className="mhome-lead fp-lead">Inbox is what's just arrived and not yet filed; the Library is everything that's been filed. Two states, one place — file something in the Inbox and it lands in the Library.</p>
       </div>
 
@@ -663,8 +663,8 @@ function StfIncoming({inbox, onFile, hideHead}){
     <div className="stf-inbox">
       {!hideHead && (
         <div className="mhome-head">
-          <p className="eyebrow">Incoming</p>
-          <h1 className="mhome-h1">One place for every file — however it arrives.</h1>
+          <p className="eyebrow">Inbox</p>
+          <h1 className="mhome-h1">Files waiting to be filed</h1>
           <p className="mhome-lead fp-lead">Associates send working files from wherever they are — Dropbox, Drive, WeTransfer, a plain email. Everything lands here, we save a copy the moment it arrives, and a quick step files each one into the Library. No more links that stop working.</p>
         </div>
       )}
@@ -870,7 +870,7 @@ function StfLibrary({docs, externalHits, searchTerm, onClearSearch, hideHead}){
       {!hideHead && (
         <div className="mhome-head">
           <p className="eyebrow">Library</p>
-          <h1 className="mhome-h1">Every filed document, easy to find.</h1>
+          <h1 className="mhome-h1">Every filed document</h1>
           <p className="mhome-lead fp-lead">Everything that's been filed lives here — policies, templates, guides, brand files, client work and the team's own records. Search it, or narrow it down by collection, file type, or who can see it.</p>
         </div>
       )}
@@ -1059,7 +1059,7 @@ function StfContacts({jumpTo, onConsumeJump}){
       <div className="stf-team-head">
         <div className="mhome-head">
           <p className="eyebrow">Contacts</p>
-          <h1 className="mhome-h1">Everyone Future Partners works with.</h1>
+          <h1 className="mhome-h1">People and organisations</h1>
           <p className="mhome-lead fp-lead">A shared address book for clients, funders, associates, partners and prospects — with each person's details, the projects they're linked to, and a history of when you last spoke.</p>
         </div>
         <div className="stf-import">
@@ -1222,7 +1222,7 @@ function StfPersonDetail({c, onBack, onOrg}){
       {(function(){ var g=stfEmailGlance(c); return (
         <div className={"stf-email"+(g.quiet?" quiet":"")}>
           <div className="stf-email-head">
-            <span className="stf-email-h"><Icon name="mail" size={16}/> Email — at a glance</span>
+            <span className="stf-email-h"><Icon name="mail" size={16}/> Email activity</span>
             <span className="stf-email-src">Outlook · Microsoft 365 <span className="stf-email-preview">preview</span></span>
           </div>
           <div className="stf-email-stats">
@@ -1597,7 +1597,7 @@ function StfBusiness(){
             <p className="eyebrow">Business health</p>
             <StfOwnerChip/>
           </div>
-          <h1 className="mhome-h1">How the practice is tracking.</h1>
+          <h1 className="mhome-h1">Invoices, money owed and utilisation</h1>
           <p className="mhome-lead fp-lead">A calm read on the numbers that matter — what's been invoiced, what's owed, who's busy, and whether projects are on budget. A concept view; figures here are illustrative.</p>
         </div>
       </div>
@@ -1710,7 +1710,7 @@ function StfNewEngagement({onBack}){
           <p className="eyebrow">New engagement</p>
           <StfOwnerChip/>
         </div>
-        <h1 className="mhome-h1">Start a project — day-one structure, zero setup.</h1>
+        <h1 className="mhome-h1">Set up a new project</h1>
         <p className="mhome-lead fp-lead">Tell us the basics. The moment you create it, Future Partners builds out the whole engagement for you — the cycle, the deliverables, the team, the folders and the compliance checks — so you start with structure, not a blank page.</p>
       </div>
 
