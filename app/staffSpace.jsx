@@ -563,6 +563,16 @@ function StfWhoBadge({audience}){
 function StfOwnerChip(){
   return <span className="stf-ownerchip"><Icon name="shield" size={12}/> Owner · you &amp; delegates</span>;
 }
+/* Honest caveat for the aspirational, whole-business views (Desk, Business): a real
+   version would have to integrate the tools Kirsty already uses — it's vision, not a quick add. */
+function StfAspirational(){
+  return (
+    <div className="stf-aspir">
+      <span className="stf-aspir-ic"><Icon name="link" size={15}/></span>
+      <span className="stf-aspir-text"><strong>Aspirational.</strong> A live version would connect to the tools you already use — Outlook, your accounting software, your file storage. It's here to show the idea of one place to glance at everything; building it for real is a deep, integrated piece of work, not a quick add.</span>
+    </div>
+  );
+}
 /* a compact 7-dot project-cycle strip (mirrors the client space cycle, dots only) */
 function StfCycleDots({stageKey}){
   const idx = CYCLE.findIndex(s=>s.key===stageKey);
@@ -1515,6 +1525,8 @@ function StfDesk({inbox, library, onSection, onContact, onNew}){
         <button className="stf-newbtn" onClick={onNew}><span className="stf-newbtn-plus">+</span> New engagement</button>
       </div>
 
+      <StfAspirational/>
+
       {/* pulse tiles */}
       <div className="stf-pulse">
         {pulse.map((p,i)=>(
@@ -1601,6 +1613,8 @@ function StfBusiness(){
           <p className="mhome-lead fp-lead">A calm read on the numbers that matter — what's been invoiced, what's owed, who's busy, and whether projects are on budget. A concept view; figures here are illustrative.</p>
         </div>
       </div>
+
+      <StfAspirational/>
 
       {/* top metrics */}
       <div className="stf-pulse">

@@ -683,3 +683,13 @@ button.stf-wrow{width:100%;text-align:left;font-family:var(--font-body);backgrou
   /* at mobile the footer is a row; keep Help + Sign out together, no stretch */
   .stf-foot-actions .mem-signout{flex:0 0 auto}
 }
+
+/* ============================================================
+   ASPIRATIONAL caveat — on the whole-business views (Desk, Business)
+   ============================================================ */
+.stf-aspir{display:flex;align-items:flex-start;gap:11px;background:var(--mist);border:1px solid var(--cloud);
+  border-radius:var(--radius-lg);padding:12px 15px;margin-bottom:22px}
+.stf-aspir-ic{flex:0 0 auto;width:28px;height:28px;border-radius:8px;background:#fff;border:1px solid var(--cloud);
+  display:flex;align-items:center;justify-content:center;color:var(--fg2)}
+.stf-aspir-text{font-size:12.5px;line-height:1.5;color:var(--fg2)}
+.stf-aspir-text strong{color:var(--ink-900);font-weight:600}
