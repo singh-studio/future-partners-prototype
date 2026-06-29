@@ -302,26 +302,31 @@ function Atlas({onContact}){
         </div>
       </section>
 
+      <section className="wrap atlas-map-sec">
+        <RealMap cases={CASES} matchSet={activeCount?matchSet:null} regions={regions}
+          onRegion={toggle(regions,setRegions)} onOpen={(id)=>navigate("/case/"+id)}/>
+      </section>
+
       <section className="wrap atg">
         <div className="atg-head">
-          <div>
-            <p className="eyebrow">At a glance</p>
-            <h2 className="atg-h">The shape of the work</h2>
+          <span className="atg-title">The shape of the work</span>
+          <span className="atg-hint meta">Tap any bar to filter</span>
+        </div>
+        <div className="atg-grid">
+          <div className="atg-col">
+            <span className="atg-col-h">Across the cycle</span>
+            <ul className="atg-bars">
+              {stageRows.map(s=>{ const on=stages.includes(s.key);
+                return (
+                  <li key={s.key}><button className={"atg-bar"+(on?" on":"")} aria-pressed={on}
+                    onClick={()=>{ toggle(stages,setStages)(s.key); toResults(); }}>
+                    <span className="atg-bar-label">{s.verb}</span>
+                    <span className="atg-bar-track"><span className="atg-bar-fill" style={{width:Math.round((s.count/stageBarMax)*100)+"%"}}></span></span>
+                    <span className="atg-bar-n">{s.count}</span>
+                  </button></li>
+                ); })}
+            </ul>
           </div>
-          <span className="atg-hint meta">Tap any bar to filter the map and list below</span>
-        </div>
-        <div className="atg-cycle-row" role="group" aria-label="Filter by project cycle stage">
-          {stageRows.map(s=>{ const on=stages.includes(s.key);
-            return (
-              <button key={s.key} className={"atg-cyc"+(on?" on":"")} aria-pressed={on}
-                onClick={()=>{ toggle(stages,setStages)(s.key); toResults(); }}>
-                <span className="atg-cyc-c">{s.count}</span>
-                <span className="atg-cyc-track"><span className="atg-cyc-fill" style={{height:Math.round((s.count/stageBarMax)*100)+"%"}}></span></span>
-                <span className="atg-cyc-name">{s.verb}</span>
-              </button>
-            ); })}
-        </div>
-        <div className="atg-breaks">
           <div className="atg-col">
             <span className="atg-col-h">By sector</span>
             <ul className="atg-bars">
@@ -351,11 +356,6 @@ function Atlas({onContact}){
             </ul>
           </div>
         </div>
-      </section>
-
-      <section className="wrap atlas-map-sec">
-        <RealMap cases={CASES} matchSet={activeCount?matchSet:null} regions={regions}
-          onRegion={toggle(regions,setRegions)} onOpen={(id)=>navigate("/case/"+id)}/>
       </section>
 
       <div className="atlas-bar-wrap" ref={barRef}>

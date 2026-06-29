@@ -50,43 +50,28 @@
 /* let the map breathe wider than the rest of the page content */
 section.atlas-map-sec.wrap{max-width:1440px}
 
-/* ---- "at a glance" overview band (folded in from the old Impact page) ---- */
-.atg{padding-top:30px;padding-bottom:6px}
-.atg-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px}
-.atg-h{font-family:var(--font-display);font-weight:700;font-size:1.5rem;letter-spacing:-.01em;color:var(--ink-900);margin:4px 0 0}
+/* ---- "at a glance" overview strip (folded in from the old Impact page) — compact, sits below the map ---- */
+.atg{padding-top:22px;padding-bottom:8px}
+.atg-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:11px}
+.atg-title{font-family:var(--font-display);font-weight:700;font-size:1.02rem;color:var(--ink-900)}
 .atg-hint{color:var(--fg3)}
-/* cycle row — slim vertical bars, ordered Scope→Improve */
-.atg-cycle-row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:end;
-  padding:16px 16px 14px;background:var(--mist);border:1px solid var(--line);border-radius:var(--radius-md);margin-bottom:14px}
-.atg-cyc{display:flex;flex-direction:column;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:6px 2px;border-radius:var(--radius-sm);transition:background .14s}
-.atg-cyc:hover{background:var(--green-50)}
-.atg-cyc-c{font-family:var(--font-display);font-weight:700;font-size:1.15rem;line-height:1;color:var(--ink-900)}
-.atg-cyc-track{width:12px;height:84px;border-radius:var(--radius-pill);background:var(--cloud);display:flex;align-items:flex-end;overflow:hidden}
-.atg-cyc-fill{width:100%;border-radius:var(--radius-pill);background:var(--green-300);min-height:5px;transition:background .16s}
-.atg-cyc-name{font-size:12px;font-weight:500;color:var(--fg2);transition:color .14s}
-.atg-cyc.on .atg-cyc-fill{background:var(--green-600)}
-.atg-cyc.on .atg-cyc-name{color:var(--green-800);font-weight:600}
-.atg-cyc.on{background:var(--green-50)}
-/* sector / region horizontal bars */
-.atg-breaks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.atg-col{background:var(--mist);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 18px}
-.atg-col-h{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);margin-bottom:12px}
-.atg-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
-.atg-bar{width:100%;display:grid;grid-template-columns:128px 1fr 26px;align-items:center;gap:12px;background:none;border:none;cursor:pointer;padding:5px 6px;border-radius:var(--radius-sm);transition:background .14s}
+.atg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  background:var(--mist);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 20px}
+.atg-col{min-width:0}
+.atg-col-h{display:block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);margin-bottom:9px}
+.atg-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.atg-bar{width:100%;display:grid;grid-template-columns:88px 1fr 22px;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:4px 5px;border-radius:var(--radius-sm);transition:background .14s}
 .atg-bar:hover{background:var(--green-50)}
-.atg-bar-label{font-size:13px;color:var(--ink-800);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.atg-bar-track{height:8px;border-radius:var(--radius-pill);background:var(--cloud);overflow:hidden}
-.atg-bar-fill{display:block;height:100%;border-radius:var(--radius-pill);background:var(--green-400);min-width:5px;transition:background .16s}
+.atg-bar-label{font-size:12.5px;color:var(--ink-800);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atg-bar-track{height:7px;border-radius:var(--radius-pill);background:var(--cloud);overflow:hidden}
+.atg-bar-fill{display:block;height:100%;border-radius:var(--radius-pill);background:var(--green-400);min-width:4px;transition:background .16s}
 .atg-bar-fill.alt{background:var(--green-600)}
-.atg-bar-n{font-family:var(--font-mono);font-size:12.5px;color:var(--fg2);text-align:right}
+.atg-bar-n{font-family:var(--font-mono);font-size:12px;color:var(--fg2);text-align:right}
 .atg-bar.on{background:var(--green-50)}
 .atg-bar.on .atg-bar-label{color:var(--green-800);font-weight:600}
 .atg-bar.on .atg-bar-fill{background:var(--green-700)}
 @media (max-width:760px){
-  .atg-breaks{grid-template-columns:1fr}
-  .atg-cycle-row{grid-template-columns:repeat(7,1fr);gap:5px;padding:12px 8px}
-  .atg-cyc-name{font-size:10px}
-  .atg-bar{grid-template-columns:104px 1fr 24px;gap:8px}
+  .atg-grid{grid-template-columns:1fr;gap:16px;padding:14px 16px}
 }
 .amap{display:flex;flex-direction:column;gap:16px}
 /* real geographic map */
