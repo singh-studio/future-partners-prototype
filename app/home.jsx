@@ -121,6 +121,40 @@ function Featured({cardStyle="feature"}){
   );
 }
 
+/* real outcomes — "what the work changed" (folded in from the old Impact page) */
+function Outcomes(){
+  const IDS = ["nauru-health","tuvalu-fisheries","niue-gcf","oxfam-eval"];
+  const cards = IDS.map(caseById).filter(c=>c&&c.full&&c.full.outcomes&&c.full.outcomes.length).map(c=>({c, o:c.full.outcomes[0]}));
+  if(!cards.length) return null;
+  return (
+    <section className="imp-outcomes section">
+      <div className="wrap">
+        <div className="sec-head reveal">
+          <div>
+            <p className="eyebrow">Real outcomes</p>
+            <h2 className="fp-h2">What the work changed</h2>
+            <p className="imp-outcomes-intro fp-lead">A few results in the partners' own terms — each drawn from a case study you can open and read in full.</p>
+          </div>
+          <Btn kind="ghost" arrow to="/atlas">See all the work</Btn>
+        </div>
+        <div className="imp-outcomegrid">
+          {cards.map(({c,o},i)=>(
+            <Link to={"/case/"+c.id} className="imp-outcome reveal" key={c.id} style={{transitionDelay:(i*60)+"ms"}}>
+              <Atag variant="solid" className="imp-outcome-stage">{STAGE[c.stage].name}</Atag>
+              <span className="imp-outcome-n">{o.n}</span>
+              <span className="imp-outcome-l">{o.l}</span>
+              <span className="imp-outcome-foot">
+                <span className="imp-outcome-place">{c.country.name} · {c.client}</span>
+                <span className="imp-outcome-link">Read the case study <span className="arr">→</span></span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* interactive project-cycle navigator */
 function CycleNav(){
   const [active, setActive] = useState("scope");
@@ -310,6 +344,7 @@ function Home({onContact, t={}}){
       <HomeHero onContact={onContact}/>
       <ProofBand/>
       <Featured cardStyle={t.cardStyle}/>
+      <Outcomes/>
       <CycleNav/>
       <StandingCast/>
       <Approach/>

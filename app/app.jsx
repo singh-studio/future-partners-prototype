@@ -1,5 +1,22 @@
 /* app.jsx — router, contact modal, mount */
 
+/* cycle-stage chooser — on-brand pills instead of a native select; writes a hidden
+   input named "stage" so the existing FormData submit keeps working. Self-contained
+   state seeded from `initial`; the parent form's key remounts it per enquiry context. */
+function StagePicker({initial}){
+  const [val, setVal] = useState(initial||"");
+  const opts = [...CYCLE.map(c=>c.verb), "Not sure yet"];
+  return (
+    <div className="mf-pills" role="group" aria-label="Project cycle stage">
+      {opts.map(o=>(
+        <button type="button" key={o} aria-pressed={val===o}
+          className={"mf-pill"+(val===o?" on":"")} onClick={()=>setVal(val===o?"":o)}>{o}</button>
+      ))}
+      <input type="hidden" name="stage" value={val}/>
+    </div>
+  );
+}
+
 function ContactModal({ctx, onClose}){
   const open = !!ctx;
   const c = ctx || {};
@@ -28,10 +45,9 @@ function ContactModal({ctx, onClose}){
                 <label className="mf-field"><span>Organisation</span><input name="org" placeholder="Department, agency or NGO"/></label>
               </div>
               <label className="mf-field"><span>Email</span><input name="email" type="email" required placeholder="you@organisation.org"/></label>
-              <label className="mf-field"><span>Where are you in the project cycle?</span>
-                <select name="stage" defaultValue={c.stageVerb||""}><option value="" disabled>Choose a stage…</option>
-                  {CYCLE.map(c=><option key={c.key}>{c.verb}</option>)}<option>Not sure yet</option></select>
-              </label>
+              <div className="mf-field"><span>Where are you in the project cycle?</span>
+                <StagePicker initial={c.stageVerb}/>
+              </div>
               <label className="mf-field"><span>What's the work?</span><textarea name="detail" rows="3" defaultValue={c.detail||""} placeholder="A few lines about the programme, country and timing."></textarea></label>
               <Btn kind="primary" size="lg" arrow type="submit">Send enquiry</Btn>
               <p className="mf-note meta">Opens your email to Kirsty at hello@futurepartners.co.nz — or call +64 21 067 2680.</p>
@@ -48,6 +64,12 @@ function ContactModal({ctx, onClose}){
       </div>
     </div>
   );
+}
+
+/* client-side redirect for retired routes (e.g. /impact → /atlas) */
+function Redirect({to}){
+  useEffect(()=>{ navigate(to); },[to]);
+  return null;
 }
 
 function Placeholder({name}){
@@ -113,7 +135,7 @@ function App(){
   else if(route.parts[0]==="news" && route.parts[1]) view = has("NewsArticle") ? <NewsArticle id={route.parts[1]} onContact={onContact}/> : <Placeholder name="Article"/>;
   else if(route.path==="/news") view = has("NewsView") ? <NewsView onContact={onContact}/> : <Placeholder name="News & insights"/>;
   else if(route.path==="/services") view = has("ServicesView") ? <ServicesView onContact={onContact}/> : <Placeholder name="Services"/>;
-  else if(route.path==="/impact") view = has("ImpactView") ? <ImpactView onContact={onContact}/> : <Placeholder name="Live impact"/>;
+  else if(route.path==="/impact") view = <Redirect to="/atlas"/>;  // Impact folded into the atlas + home; keep old links alive
   else if(route.path==="/trust") view = has("TrustView") ? <TrustView onContact={onContact}/> : <Placeholder name="Trust & security"/>;
   else view = <Placeholder name="Not found"/>;
 

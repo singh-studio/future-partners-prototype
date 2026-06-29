@@ -268,6 +268,16 @@ function Atlas({onContact}){
     ...clientTypes.map(k=>({k,label:k,rm:()=>toggle(clientTypes,setClientTypes)(k)})),
   ];
 
+  /* ---- "at a glance" overview: real counts that double as filters (folded in from the old Impact page) ---- */
+  const barRef = useRef(null);
+  const toResults = ()=>{ const el=barRef.current; if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-72, behavior:"smooth"}); };
+  const stageRows = CYCLE.map(s=>({key:s.key, n:s.n, verb:s.verb, count:CASES.filter(c=>c.stage===s.key).length}));
+  const stageBarMax = Math.max(1,...stageRows.map(r=>r.count));
+  const sectorRows = SECTORS.map(k=>({k, count:CASES.filter(c=>c.sectors.includes(k)).length})).filter(r=>r.count>0).sort((a,b)=>b.count-a.count).slice(0,8);
+  const sectorBarMax = Math.max(1,...sectorRows.map(r=>r.count));
+  const regionRows = REGIONS.map(k=>({k, count:CASES.filter(c=>c.region===k).length})).filter(r=>r.count>0).sort((a,b)=>b.count-a.count);
+  const regionBarMax = Math.max(1,...regionRows.map(r=>r.count));
+
   const pillGroup=(opts,val,onToggle)=>(
     <div className="fdrop-opts">{opts.map(o=>{
       const key=o.key||o; const on=val.includes(key);
@@ -292,12 +302,63 @@ function Atlas({onContact}){
         </div>
       </section>
 
+      <section className="wrap atg">
+        <div className="atg-head">
+          <div>
+            <p className="eyebrow">At a glance</p>
+            <h2 className="atg-h">The shape of the work</h2>
+          </div>
+          <span className="atg-hint meta">Tap any bar to filter the map and list below</span>
+        </div>
+        <div className="atg-cycle-row" role="group" aria-label="Filter by project cycle stage">
+          {stageRows.map(s=>{ const on=stages.includes(s.key);
+            return (
+              <button key={s.key} className={"atg-cyc"+(on?" on":"")} aria-pressed={on}
+                onClick={()=>{ toggle(stages,setStages)(s.key); toResults(); }}>
+                <span className="atg-cyc-c">{s.count}</span>
+                <span className="atg-cyc-track"><span className="atg-cyc-fill" style={{height:Math.round((s.count/stageBarMax)*100)+"%"}}></span></span>
+                <span className="atg-cyc-name">{s.verb}</span>
+              </button>
+            ); })}
+        </div>
+        <div className="atg-breaks">
+          <div className="atg-col">
+            <span className="atg-col-h">By sector</span>
+            <ul className="atg-bars">
+              {sectorRows.map(r=>{ const on=sectors.includes(r.k);
+                return (
+                  <li key={r.k}><button className={"atg-bar"+(on?" on":"")} aria-pressed={on}
+                    onClick={()=>{ toggle(sectors,setSectors)(r.k); toResults(); }}>
+                    <span className="atg-bar-label">{r.k}</span>
+                    <span className="atg-bar-track"><span className="atg-bar-fill" style={{width:Math.round((r.count/sectorBarMax)*100)+"%"}}></span></span>
+                    <span className="atg-bar-n">{r.count}</span>
+                  </button></li>
+                ); })}
+            </ul>
+          </div>
+          <div className="atg-col">
+            <span className="atg-col-h">By region</span>
+            <ul className="atg-bars">
+              {regionRows.map(r=>{ const on=regions.includes(r.k);
+                return (
+                  <li key={r.k}><button className={"atg-bar"+(on?" on":"")} aria-pressed={on}
+                    onClick={()=>{ toggle(regions,setRegions)(r.k); toResults(); }}>
+                    <span className="atg-bar-label">{r.k}</span>
+                    <span className="atg-bar-track"><span className="atg-bar-fill alt" style={{width:Math.round((r.count/regionBarMax)*100)+"%"}}></span></span>
+                    <span className="atg-bar-n">{r.count}</span>
+                  </button></li>
+                ); })}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <section className="wrap atlas-map-sec">
         <RealMap cases={CASES} matchSet={activeCount?matchSet:null} regions={regions}
           onRegion={toggle(regions,setRegions)} onOpen={(id)=>navigate("/case/"+id)}/>
       </section>
 
-      <div className="atlas-bar-wrap">
+      <div className="atlas-bar-wrap" ref={barRef}>
         <div className="wrap atlas-bar">
           <label className="atlas-search">
             <Icon name="search" size={17}/>
