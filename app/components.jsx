@@ -84,6 +84,8 @@ const ICONS = {
   clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2",
   sprout:"M7 20h10M12 20V10M12 10C12 6 9 4 5 4c0 4 3 6 7 6zM12 12c0-3 2.5-5 6-5 0 3.5-2.5 5-6 5z",
   link:"M9 15l6-6M10 6l1-1a4 4 0 0 1 6 6l-1 1M14 18l-1 1a4 4 0 0 1-6-6l1-1",
+  spark:"M12 4l1.7 4.6 4.6 1.7-4.6 1.7L12 16.6l-1.7-4.6L5.7 10.3l4.6-1.7zM18.5 13.5l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z",
+  send:"M22 2L11 13M22 2l-7 20-4-9-9-4z",
 };
 /* brand share glyphs (filled) — rendered separately so they can use fill */
 const BRAND_ICONS = {

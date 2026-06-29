@@ -436,6 +436,9 @@ function StaffSpace({signOut, switcher}){
   const [search, setSearch]   = useState("");
   const [newEng, setNewEng]   = useState(false); // the "+ New engagement" sub-view (Feature 3)
   const [contactJump, setContactJump] = useState(null); // a contact id the Desk wants to open
+  const [askOpen, setAskOpen] = useState(false); // the content assistant panel (concept)
+  const [askSeed, setAskSeed] = useState(null);  // {text, n} signal to seed it from the Desk bar
+  const askAssistant = (text)=>{ setAskSeed({text, n:Date.now()}); setAskOpen(true); };
 
   /* file a freshly-arrived item: mark it filed in the inbox, add a Library record */
   const fileItem = (item, choice)=>{
@@ -530,13 +533,15 @@ function StaffSpace({signOut, switcher}){
               : newEng
                 ? <StfNewEngagement onBack={()=>setNewEng(false)}/>
                 : <React.Fragment>
-                    {section==="desk"     && <StfDesk inbox={inbox} library={library} onSection={goSection} onContact={openContact} onNew={()=>setNewEng(true)}/>}
+                    {section==="desk"     && <StfDesk inbox={inbox} library={library} onSection={goSection} onContact={openContact} onNew={()=>setNewEng(true)} onAsk={askAssistant}/>}
                     {section==="files"    && <StfFiles tab={filesTab} onTab={setFilesTab} inbox={inbox} library={library} needsCount={needsCount} onFile={fileItem}/>}
                     {section==="contacts" && <StfContacts jumpTo={contactJump} onConsumeJump={()=>setContactJump(null)}/>}
                     {section==="business" && <StfBusiness/>}
                   </React.Fragment>}
         </div>
       </div>
+
+      {typeof StfAssistant!=="undefined" && <StfAssistant open={askOpen} showFab={!(section==="desk" && !helpOpen && !newEng && !searchHits)} onOpen={()=>setAskOpen(true)} onClose={()=>setAskOpen(false)} seed={askSeed}/>}
     </div>
   );
 }
@@ -1478,7 +1483,7 @@ function StfGuideDoc({doc, onBack}){
    Everything here derives from the file's own mock data so the numbers stay
    consistent with Incoming, Contacts and the active engagements.
    ===================================================================== */
-function StfDesk({inbox, library, onSection, onContact, onNew}){
+function StfDesk({inbox, library, onSection, onContact, onNew, onAsk}){
   /* — derive the day's realities from existing data — */
   const needs    = inbox.filter(i=>i.status==="needs");
   const expiring = needs.filter(i=>i.expiresIn!=null);
@@ -1524,6 +1529,8 @@ function StfDesk({inbox, library, onSection, onContact, onNew}){
         </div>
         <button className="stf-newbtn" onClick={onNew}><span className="stf-newbtn-plus">+</span> New engagement</button>
       </div>
+
+      {onAsk && typeof StfDeskAsk!=="undefined" && <StfDeskAsk onAsk={onAsk}/>}
 
       <StfAspirational/>
 
