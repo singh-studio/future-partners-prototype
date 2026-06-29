@@ -4,10 +4,20 @@ const { useState, useEffect, useRef, useCallback } = React;
 /* ---------------- hash router ---------------- */
 function useRoute(){
   const parse = () => {
-    const h = (location.hash || "#/").replace(/^#/, "");
-    const parts = h.split("/").filter(Boolean); // ["case","id"]
-    return { path: "/"+parts.join("/"), parts };
+    const raw = (location.hash || "#/").replace(/^#/, "");
+    const qi = raw.indexOf("?");
+    const pathStr = qi>=0 ? raw.slice(0,qi) : raw;
+    const queryStr = qi>=0 ? raw.slice(qi+1) : "";
+    const parts = pathStr.split("/").filter(Boolean); // ["case","id"]
+    const query = {};
+    queryStr.split("&").filter(Boolean).forEach(kv=>{
+      const eq=kv.indexOf("="); const k=eq>=0?kv.slice(0,eq):kv; const v=eq>=0?kv.slice(eq+1):"";
+      try{ query[decodeURIComponent(k)]=decodeURIComponent(v.replace(/\+/g," ")); }catch(_){ query[k]=v; }
+    });
+    return { path: "/"+parts.join("/"), parts, query };
   };
+  /* read the query off the current hash without subscribing to route changes */
+  if(typeof window!=="undefined") window.hashQuery = ()=>parse().query;
   const [route, setRoute] = useState(parse());
   useEffect(()=>{
     let sweeping=false;
@@ -184,8 +194,116 @@ const NAV = [
   {label:"People", to:"/people"},
   {label:"News", to:"/news"},
 ];
+/* ---------------- site-wide search ---------------- */
+const SEARCH_PAGES = [
+  {label:"Case study atlas", to:"/atlas", desc:"Every assignment, mapped across the region"},
+  {label:"Our impact", to:"/impact", desc:"Proof, measured — the numbers behind the work"},
+  {label:"Services & the project cycle", to:"/services", desc:"How we work, stage by stage"},
+  {label:"People & associates", to:"/people", desc:"The delivery network"},
+  {label:"News & insights", to:"/news", desc:"From the field"},
+  {label:"Trust & security", to:"/trust", desc:"How your information is handled"},
+];
+function siteSearch(q){
+  const t = (q||"").trim().toLowerCase();
+  if(!t) return null;
+  const has = s => (s||"").toLowerCase().includes(t);
+  const cases = (window.CASES||[]).filter(c=>has(c.title+" "+c.client+" "+(c.country&&c.country.name)+" "+(c.sectors||[]).join(" ")+" "+c.region)).slice(0,6);
+  const people = (window.PEOPLE||[]).filter(p=>has(p.name+" "+p.role+" "+(p.expertise||[]).join(" ")+" "+(p.regions||[]).join(" ")+" "+(p.sectors||[]).join(" "))).slice(0,6);
+  const news = (window.NEWS||[]).filter(n=>has(n.title+" "+n.excerpt+" "+(n.topics||[]).join(" "))).slice(0,5);
+  const pages = SEARCH_PAGES.filter(p=>has(p.label+" "+p.desc)).slice(0,4);
+  return {cases, people, news, pages, total: cases.length+people.length+news.length+pages.length};
+}
+function SiteSearch({open, onClose}){
+  const [q, setQ] = useState("");
+  const [hi, setHi] = useState(0);
+  const inputRef = useRef(null);
+  const res = siteSearch(q);
+  /* flat, ordered list of destinations for keyboard nav */
+  const flat = res ? [
+    ...res.pages.map(p=>({to:p.to})),
+    ...res.cases.map(c=>({to:"/case/"+c.id})),
+    ...res.people.map(p=>({to:"/people/"+p.id})),
+    ...res.news.map(n=>({to:"/news/"+n.id})),
+  ] : [];
+  useEffect(()=>{ if(open){ setQ(""); setHi(0); setTimeout(()=>inputRef.current&&inputRef.current.focus(),40);
+    document.body.style.overflow="hidden"; } return ()=>{ document.body.style.overflow=""; }; },[open]);
+  useEffect(()=>{ setHi(0); },[q]);
+  if(!open) return null;
+  const go = (to)=>{ onClose(); navigate(to); };
+  const onKey = (e)=>{
+    if(e.key==="Escape"){ onClose(); }
+    else if(e.key==="ArrowDown"){ e.preventDefault(); setHi(h=>Math.min(flat.length-1,h+1)); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); setHi(h=>Math.max(0,h-1)); }
+    else if(e.key==="Enter" && flat[hi]){ e.preventDefault(); go(flat[hi].to); }
+  };
+  let idx = -1; const row = ()=>{ idx++; return idx; };
+  return (
+    <div className="sitesearch-scrim" onClick={onClose}>
+      <div className="sitesearch" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Search the site">
+        <div className="ss-bar">
+          <Icon name="search" size={20}/>
+          <input ref={inputRef} className="ss-input" value={q} onChange={e=>setQ(e.target.value)} onKeyDown={onKey}
+            placeholder="Search case studies, people, news…" aria-label="Search"/>
+          <button className="ss-x" onClick={onClose} aria-label="Close search"><Icon name="x" size={18}/></button>
+        </div>
+        <div className="ss-body">
+          {!q.trim() && (
+            <div className="ss-hint">
+              <p className="ss-hint-h">Search across everything</p>
+              <p className="ss-hint-p">Try a country, a sector, a person, or a client — “Tuvalu”, “climate finance”, “evaluation”, “MFAT”.</p>
+            </div>
+          )}
+          {q.trim() && res && res.total===0 && (
+            <div className="ss-hint"><p className="ss-hint-h">No matches for “{q.trim()}”.</p>
+              <p className="ss-hint-p">Try a broader term, or browse the <a href="#/atlas" onClick={e=>{e.preventDefault(); go("/atlas");}}>case study atlas</a>.</p></div>
+          )}
+          {q.trim() && res && res.pages.length>0 && (
+            <div className="ss-group"><span className="ss-group-h">Pages</span>
+              {res.pages.map(p=>{ const r=row(); return (
+                <a key={p.to} href={"#"+p.to} className={"ss-row"+(hi===r?" hi":"")} onMouseEnter={()=>setHi(r)} onClick={e=>{e.preventDefault(); go(p.to);}}>
+                  <span className="ss-row-ic"><Icon name="compass" size={16}/></span>
+                  <span className="ss-row-main"><span className="ss-row-t">{p.label}</span><span className="ss-row-d">{p.desc}</span></span>
+                </a>); })}
+            </div>
+          )}
+          {q.trim() && res && res.cases.length>0 && (
+            <div className="ss-group"><span className="ss-group-h">Case studies</span>
+              {res.cases.map(c=>{ const r=row(); return (
+                <a key={c.id} href={"#/case/"+c.id} className={"ss-row"+(hi===r?" hi":"")} onMouseEnter={()=>setHi(r)} onClick={e=>{e.preventDefault(); go("/case/"+c.id);}}>
+                  <span className="ss-row-ic"><Icon name="pin" size={16}/></span>
+                  <span className="ss-row-main"><span className="ss-row-t">{c.title}</span><span className="ss-row-d">{c.country.name} · {c.client} · {c.year}</span></span>
+                  <span className="ss-row-tag">{STAGE[c.stage].name}</span>
+                </a>); })}
+            </div>
+          )}
+          {q.trim() && res && res.people.length>0 && (
+            <div className="ss-group"><span className="ss-group-h">People</span>
+              {res.people.map(p=>{ const r=row(); return (
+                <a key={p.id} href={"#/people/"+p.id} className={"ss-row"+(hi===r?" hi":"")} onMouseEnter={()=>setHi(r)} onClick={e=>{e.preventDefault(); go("/people/"+p.id);}}>
+                  <span className="ss-row-ic"><Icon name="users" size={16}/></span>
+                  <span className="ss-row-main"><span className="ss-row-t">{p.name}</span><span className="ss-row-d">{p.role}</span></span>
+                </a>); })}
+            </div>
+          )}
+          {q.trim() && res && res.news.length>0 && (
+            <div className="ss-group"><span className="ss-group-h">News & insights</span>
+              {res.news.map(n=>{ const r=row(); return (
+                <a key={n.id} href={"#/news/"+n.id} className={"ss-row"+(hi===r?" hi":"")} onMouseEnter={()=>setHi(r)} onClick={e=>{e.preventDefault(); go("/news/"+n.id);}}>
+                  <span className="ss-row-ic"><Icon name="book" size={16}/></span>
+                  <span className="ss-row-main"><span className="ss-row-t">{n.title}</span><span className="ss-row-d">{n.cat} · {n.excerpt}</span></span>
+                </a>); })}
+            </div>
+          )}
+        </div>
+        <div className="ss-foot meta"><span><kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>↵</kbd> to open · <kbd>esc</kbd> to close</span></div>
+      </div>
+    </div>
+  );
+}
+
 function Header({route, onContact}){
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [solid, setSolid] = useState(false);
   const onDark = route.path==="/" ; // home has light hero now → always light header
   useEffect(()=>{
@@ -198,6 +316,11 @@ function Header({route, onContact}){
     window.addEventListener("keydown",esc);
     return ()=>{ window.removeEventListener("keydown",esc); document.body.style.overflow=""; };
   },[open]);
+  useEffect(()=>{
+    const onK=(e)=>{ if((e.metaKey||e.ctrlKey) && (e.key==="k"||e.key==="K")){ e.preventDefault(); setSearchOpen(true); setOpen(false); } };
+    window.addEventListener("keydown",onK);
+    return ()=>window.removeEventListener("keydown",onK);
+  },[]);
   const go = (to)=>{ setOpen(false);
     if(to.startsWith("/#")){ const id=to.slice(2); if(route.path!=="/"){ navigate("/"); setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:"smooth"}),60);} else document.getElementById(id)?.scrollIntoView({behavior:"smooth"}); }
     else navigate(to);
@@ -216,10 +339,14 @@ function Header({route, onContact}){
           ))}
         </nav>
         <div className="site-head-cta">
+          <button className="site-search-btn" aria-label="Search (⌘K)" title="Search ⌘K" onClick={()=>setSearchOpen(true)}><Icon name="search" size={16}/></button>
           <a href="#/members" className="site-login" onClick={(e)=>{e.preventDefault(); go("/members");}}><Icon name="lock" size={14}/> Sign in</a>
           <Btn kind="primary" size="sm" arrow onClick={onContact}>Work with us</Btn>
         </div>
-        <button className="site-burger" aria-label="Open menu" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/></button>
+        <div className="site-head-mobacts">
+          <button className="site-search-btn" aria-label="Search" onClick={()=>setSearchOpen(true)}><Icon name="search" size={18}/></button>
+          <button className="site-burger" aria-label="Open menu" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/></button>
+        </div>
       </div>
     </header>
 
@@ -251,6 +378,7 @@ function Header({route, onContact}){
           </div>
         </div>
       </div>
+      <SiteSearch open={searchOpen} onClose={()=>setSearchOpen(false)}/>
     </>
   );
 }

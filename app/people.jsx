@@ -60,7 +60,7 @@ function AssociateProfile({id, onContact}){
           <p className="ap-bio2 lead">{bioLead}</p>
           {bioRest.map((t,i)=><p className="ap-bio2" key={i}>{t}</p>)}
           <div className="ap-actions">
-            <Btn kind="primary" size="lg" arrow onClick={onContact}>Work with {first}</Btn>
+            <Btn kind="primary" size="lg" arrow onClick={()=>onContact({heading:`Work with ${first} and the team`, sub:`Tell us what you're working on and we'll see how ${first} can help. Kirsty is the first point of contact for every enquiry.`, detail:`I'd like to talk about working with ${p.name} (${p.role}).`, source:`Associate: ${p.name}`})}>Work with {first}</Btn>
             {cases.length>0 && <Btn kind="secondary" size="lg" onClick={scrollWork}>See their work</Btn>}
           </div>
         </div>
@@ -93,7 +93,7 @@ function AssociateProfile({id, onContact}){
         <section className="wrap ap-work2 section" id="ap-work">
           <div className="sec-head">
             <div><p className="eyebrow">In the atlas</p><h2 className="fp-h2">Selected work</h2></div>
-            <Btn kind="ghost" arrow to="/atlas">Open the atlas</Btn>
+            <Btn kind="ghost" arrow to={"/atlas?person="+p.id}>See all {first}'s work in the atlas</Btn>
           </div>
           <div className="ap-gallery">
             {cases.map((c,i)=>(

@@ -186,7 +186,12 @@ function ImpactView({onContact}){
             <p className="imp-clients-sub">Governments, UN agencies, Crown research institutes, NGOs and funders trust Future Partners with the work that matters most.</p>
           </div>
           <div className="imp-clients-logos">
-            {CLIENTS.map(c=><span className="proof-logo" key={c}>{c}</span>)}
+            {CLIENTS.map(c=>{
+              const hits = CASES.filter(x=>x.client.toLowerCase().includes(c.toLowerCase())).length;
+              return hits
+                ? <Link to={"/atlas?q="+encodeURIComponent(c)} className="proof-logo is-link" key={c} title={`See our work with ${c}`}>{c}</Link>
+                : <span className="proof-logo" key={c}>{c}</span>;
+            })}
           </div>
         </div>
       </section>

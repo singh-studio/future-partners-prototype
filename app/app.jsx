@@ -1,6 +1,8 @@
 /* app.jsx — router, contact modal, mount */
 
-function ContactModal({open, onClose}){
+function ContactModal({ctx, onClose}){
+  const open = !!ctx;
+  const c = ctx || {};
   const [sent, setSent] = useState(false);
   useEffect(()=>{ if(open){ setSent(false); const k=(e)=>e.key==="Escape"&&onClose(); window.addEventListener("keydown",k); return ()=>window.removeEventListener("keydown",k);} },[open]);
   if(!open) return null;
@@ -10,13 +12,14 @@ function ContactModal({open, onClose}){
         <button className="modal-x" onClick={onClose} aria-label="Close"><Icon name="x"/></button>
         {!sent ? (
           <>
-            <p className="eyebrow">Work with us</p>
-            <h3 className="modal-h">Tell us about the problem you're trying to solve.</h3>
-            <p className="modal-sub">We'll come back to you with a sensible first step — no surprises. Kirsty is the first point of contact for every enquiry.</p>
-            <form className="modal-form" onSubmit={(e)=>{e.preventDefault();
+            <p className="eyebrow">{c.eyebrow||"Work with us"}</p>
+            <h3 className="modal-h">{c.heading||"Tell us about the problem you're trying to solve."}</h3>
+            <p className="modal-sub">{c.sub||"We'll come back to you with a sensible first step — no surprises. Kirsty is the first point of contact for every enquiry."}</p>
+            {c.source && <p className="modal-context"><Icon name="pin" size={13}/> {c.source}</p>}
+            <form key={c.source||"contact"} className="modal-form" onSubmit={(e)=>{e.preventDefault();
               const f=new FormData(e.target);
-              const subject=`Enquiry from ${f.get("name")||"a partner"}${f.get("org")?" · "+f.get("org"):""}`;
-              const body=`Name: ${f.get("name")||""}\nOrganisation: ${f.get("org")||""}\nEmail: ${f.get("email")||""}\nProject cycle stage: ${f.get("stage")||""}\n\n${f.get("detail")||""}`;
+              const subject=`Enquiry from ${f.get("name")||"a partner"}${f.get("org")?" · "+f.get("org"):""}${c.source?" · re: "+c.source:""}`;
+              const body=`${c.source?"Enquiry via: "+c.source+"\n":""}Name: ${f.get("name")||""}\nOrganisation: ${f.get("org")||""}\nEmail: ${f.get("email")||""}\nProject cycle stage: ${f.get("stage")||""}\n\n${f.get("detail")||""}`;
               window.location.href=`mailto:hello@futurepartners.co.nz?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
               setSent(true);
             }}>
@@ -26,10 +29,10 @@ function ContactModal({open, onClose}){
               </div>
               <label className="mf-field"><span>Email</span><input name="email" type="email" required placeholder="you@organisation.org"/></label>
               <label className="mf-field"><span>Where are you in the project cycle?</span>
-                <select name="stage" defaultValue=""><option value="" disabled>Choose a stage…</option>
+                <select name="stage" defaultValue={c.stageVerb||""}><option value="" disabled>Choose a stage…</option>
                   {CYCLE.map(c=><option key={c.key}>{c.verb}</option>)}<option>Not sure yet</option></select>
               </label>
-              <label className="mf-field"><span>What's the work?</span><textarea name="detail" rows="3" placeholder="A few lines about the programme, country and timing."></textarea></label>
+              <label className="mf-field"><span>What's the work?</span><textarea name="detail" rows="3" defaultValue={c.detail||""} placeholder="A few lines about the programme, country and timing."></textarea></label>
               <Btn kind="primary" size="lg" arrow type="submit">Send enquiry</Btn>
               <p className="mf-note meta">Opens your email to Kirsty at hello@futurepartners.co.nz — or call +64 21 067 2680.</p>
             </form>
@@ -85,8 +88,10 @@ function FPTweaks({t, setTweak}){
 
 function App(){
   const route = useRoute();
-  const [contact, setContact] = useState(false);
-  const onContact = ()=>setContact(true);
+  const [contact, setContact] = useState(null);
+  /* onContact() opens a generic enquiry; onContact({heading, sub, detail, stageVerb, source})
+     opens a context-aware one. Guard against being passed a click event by call sites. */
+  const onContact = (ctx)=> setContact(ctx && typeof ctx==="object" && !ctx.target && !ctx.nativeEvent ? ctx : {});
   const has = (n)=>typeof window[n]==="function";
   const hasTweaks = typeof useTweaks==="function";
   const [t, setTweak] = hasTweaks ? useTweaks(TWEAK_DEFAULTS) : [TWEAK_DEFAULTS, ()=>{}];
@@ -117,7 +122,7 @@ function App(){
     <>
       {!bareMembers && <Header route={route} onContact={onContact}/>}
       {view}
-      <ContactModal open={contact} onClose={()=>setContact(false)}/>
+      <ContactModal ctx={contact} onClose={()=>setContact(null)}/>
       {hasTweaks && <FPTweaks t={t} setTweak={setTweak}/>}
     </>
   );

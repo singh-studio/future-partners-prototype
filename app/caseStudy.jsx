@@ -180,7 +180,7 @@ function CaseStudy({id, onContact}){
           </div>
         </section>
       )}
-      <CTAFooter onContact={onContact}/>
+      <CTAFooter onContact={()=>onContact({heading:"Interested in work like this?", sub:`Tell us about your programme and we'll suggest a sensible first step — ${c.client} worked with us on this, and we'd be glad to talk about yours.`, detail:`I'm interested in work similar to "${c.title}" (${c.client}, ${c.country.name}, ${c.year}).`, stageVerb:STAGE[c.stage].verb, source:`Case study: ${c.title}`})}/>
     </main>
   );
 }

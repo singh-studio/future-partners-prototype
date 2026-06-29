@@ -278,7 +278,7 @@ function ServicesView({onContact}){
             <h1 className="page-h1">Support across the whole project cycle.</h1>
             <p className="fp-lead page-lead">We help you scope, design, fund, plan, deliver, review and improve development projects — from one part of the cycle to a programme end to end. We make sense of the complexity and develop coherent plans from what may seem like ambiguity.</p>
             <div className="srv-hero-actions">
-              <Btn kind="primary" size="lg" arrow onClick={onContact}>Work with us</Btn>
+              <Btn kind="primary" size="lg" arrow onClick={()=>onContact({heading:`Let's talk about the ${A.name.toLowerCase()} stage`, detail:`We're at (or thinking about) the "${A.name}" stage of the project cycle and would like to talk.`, stageVerb:A.verb, source:`Service stage: ${A.name}`})}>Work with us</Btn>
               <Btn kind="secondary" size="lg" arrow to="/atlas">See it in the work</Btn>
             </div>
           </div>

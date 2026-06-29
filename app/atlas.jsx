@@ -230,23 +230,27 @@ function Dropdown({label, count, children}){
 }
 
 function Atlas({onContact}){
+  const Q = (typeof window.hashQuery==="function") ? window.hashQuery() : {};
   const [stages,setStages]=useState([]);
   const [sectors,setSectors]=useState([]);
   const [regions,setRegions]=useState([]);
   const [clientTypes,setClientTypes]=useState([]);
-  const [query,setQuery]=useState("");
+  const [query,setQuery]=useState(Q.q||"");
+  const [personF,setPersonF]=useState(Q.person||"");
   const [view,setView]=useState("grid");
   const [sort,setSort]=useState("year");
 
   const toggle=(arr,set)=>(k)=>set(arr.includes(k)?arr.filter(x=>x!==k):[...arr,k]);
-  const clearAll=()=>{setStages([]);setSectors([]);setRegions([]);setClientTypes([]);setQuery("");};
-  const activeCount=stages.length+sectors.length+regions.length+clientTypes.length+(query?1:0);
+  const clearAll=()=>{setStages([]);setSectors([]);setRegions([]);setClientTypes([]);setQuery("");setPersonF("");};
+  const personObj = personF ? personById(personF) : null;
+  const activeCount=stages.length+sectors.length+regions.length+clientTypes.length+(query?1:0)+(personF?1:0);
 
   const match=(c)=>{
     if(stages.length && !stages.includes(c.stage)) return false;
     if(sectors.length && !c.sectors.some(s=>sectors.includes(s))) return false;
     if(regions.length && !regions.includes(c.region)) return false;
     if(clientTypes.length && !clientTypes.includes(c.clientType)) return false;
+    if(personF && !(c.people||[]).includes(personF)) return false;
     if(query){ const q=query.toLowerCase(); if(!(c.title+" "+c.client+" "+c.country.name).toLowerCase().includes(q)) return false; }
     return true;
   };
@@ -257,6 +261,7 @@ function Atlas({onContact}){
     : a.country.name.localeCompare(b.country.name));
 
   const chips=[
+    ...(personObj?[{k:"__person",label:"Work by "+personObj.name,rm:()=>setPersonF("")}]:[]),
     ...stages.map(k=>({k,label:STAGE[k].name,rm:()=>toggle(stages,setStages)(k)})),
     ...sectors.map(k=>({k,label:k,rm:()=>toggle(sectors,setSectors)(k)})),
     ...regions.map(k=>({k,label:k,rm:()=>toggle(regions,setRegions)(k)})),

@@ -43,7 +43,12 @@ function ProofBand(){
           <p className="proof-sub">Governments, UN agencies, Crown research institutes, NGOs and the private sector across the region.</p>
         </div>
         <div className="proof-logos">
-          {CLIENTS.map(c=><span className="proof-logo" key={c}>{c}</span>)}
+          {CLIENTS.map(c=>{
+            const hits = CASES.filter(x=>x.client.toLowerCase().includes(c.toLowerCase())).length;
+            return hits
+              ? <Link to={"/atlas?q="+encodeURIComponent(c)} className="proof-logo is-link" key={c} title={`See our work with ${c}`}>{c}</Link>
+              : <span className="proof-logo" key={c}>{c}</span>;
+          })}
         </div>
       </div>
     </section>
